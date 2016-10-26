@@ -43,6 +43,7 @@ spr_selected_item = 43
 spr_boots = 38
 spr_flipper = 54
 spr_bomb = 57
+bomb_damage = 3
 treasures = {{x=3,y=4,sprite=spr_boots},{x=3,y=13,sprite=spr_bomb},{x=11,y=4,sprite=spr_flipper},{x=11,y=11,sprite=heart_full}}
 
 -- func
@@ -55,7 +56,7 @@ function _init()
 	move_speed = walking
 	tick = 0
 	current_spr = 0
-	bobby = {sx=0,sy=0,frame={hitbox={x=2,y=6,width=4,height=1}},flip_x=false,x=32,y=32}
+	bobby = {sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=32,y=32}
 	background_color = 3
 	move_count = 0
 	btn_1_down = false
@@ -122,7 +123,7 @@ function use_item()
  if item_available(spr_boots) then
   move_speed = running
  elseif item_available(spr_bomb) and current_bomb == nil then
-  current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90}
+  current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
  end
 end
 
@@ -215,8 +216,8 @@ function set_current_spr(orientation)
 end
 
 function is_on_terrain_type(t)
- local mid_x = flr((bobby.x + bobby.frame.hitbox.x + (bobby.frame.hitbox.width * 0.5) - map_x)/8)
- local mid_y = flr((bobby.y + bobby.frame.hitbox.y + (bobby.frame.hitbox.height * 0.5) - map_y)/8)
+ local mid_x = flr((bobby.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5) - map_x)/8)
+ local mid_y = flr((bobby.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5) - map_y)/8)
  local cell = mget(mid_x,mid_y)
  return fget(cell,t)
 end
@@ -291,7 +292,7 @@ function current_overlaped_cells()
  for i=0,1 do
   for j=0,1 do
    cell_x = flr((bobby.x + (i * 8) - map_x)/8)
-   cell_y = flr((bobby.y + bobby.frame.hitbox.y + (j%2)*bobby.frame.hitbox.height - map_y)/8)
+   cell_y = flr((bobby.y + bobby.hitbox.y + (j%2)*bobby.hitbox.height - map_y)/8)
    add(cells,{x=cell_x,y=cell_y,cell=mget(cell_x,cell_y)})
   end
  end
@@ -299,10 +300,10 @@ function current_overlaped_cells()
 end
 
 function current_collided_cells()
- local cell_min_x = flr((bobby.x + bobby.frame.hitbox.x - map_x)/8)
- local cell_max_x = flr((bobby.x + bobby.frame.hitbox.x + bobby.frame.hitbox.width - map_x)/8)
- local cell_min_y = flr((bobby.y + bobby.frame.hitbox.y - map_y)/8)
- local cell_max_y = flr((bobby.y + bobby.frame.hitbox.y + bobby.frame.hitbox.height - map_y)/8)
+ local cell_min_x = flr((bobby.x + bobby.hitbox.x - map_x)/8)
+ local cell_max_x = flr((bobby.x + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
+ local cell_min_y = flr((bobby.y + bobby.hitbox.y - map_y)/8)
+ local cell_max_y = flr((bobby.y + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
  return {{x=cell_min_x,y=cell_min_y,cell=mget(cell_min_x,cell_min_y)},{x=cell_max_x,y=cell_min_y,cell=mget(cell_max_x,cell_min_y)},{x=cell_min_x,y=cell_max_y,cell=mget(cell_min_x,cell_max_y)},{x=cell_max_x,y=cell_max_y,cell=mget(cell_max_x,cell_max_y)}}
 end
 
@@ -313,24 +314,24 @@ function collision_cells()
  local cell_max_y = 0
  
  if not (bobby.sy == 0) then
-  cell_min_x = flr((bobby.x + bobby.frame.hitbox.x - map_x)/8)
-  cell_max_x = flr((bobby.x + bobby.frame.hitbox.x + bobby.frame.hitbox.width - map_x)/8)
+  cell_min_x = flr((bobby.x + bobby.hitbox.x - map_x)/8)
+  cell_max_x = flr((bobby.x + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
   if bobby.sy > 0 then
-   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.frame.hitbox.y + bobby.frame.hitbox.height - map_y)/8)
-   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.frame.hitbox.y + bobby.frame.hitbox.height - map_y)/8)
+   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
+   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
   else
-   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.frame.hitbox.y - map_y)/8)
-   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.frame.hitbox.y - map_y)/8)
+   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y - map_y)/8)
+   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y - map_y)/8)
   end
  elseif not (bobby.sx == 0) then
-  cell_min_y = flr((bobby.y + bobby.frame.hitbox.y - map_y)/8)
-  cell_max_y = flr((bobby.y + bobby.frame.hitbox.y + bobby.frame.hitbox.height - map_y)/8)
+  cell_min_y = flr((bobby.y + bobby.hitbox.y - map_y)/8)
+  cell_max_y = flr((bobby.y + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
   if bobby.sx > 0 then
-   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.frame.hitbox.x + bobby.frame.hitbox.width - map_x)/8)
-   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.frame.hitbox.x + bobby.frame.hitbox.width - map_x)/8)
+   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
+   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
   else
-   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.frame.hitbox.x - map_x)/8)
-   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.frame.hitbox.x - map_x)/8)
+   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x - map_x)/8)
+   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x - map_x)/8)
   end
  end
  
@@ -355,13 +356,13 @@ function _draw()
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
 	draw_opened_treasure()
 	open_treasure_if_needed()
+ handle_bombs()
 	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
 	if is_on_terrain_type(flag_water) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
 	draw_background_if_behind()
  draw_hud()
- handle_bombs()
 end
 
 function draw_opened_treasure()
@@ -426,7 +427,28 @@ function bomb_explode()
 end
 
 function handle_bomb_damage()
+ local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y, hitbox=bobby.hitbox}
+ if distance(current_bomb,bobby_map_position) < 12 then
+  injured(bomb_damage)
+ end
  current_bomb = nil
+end
+
+function distance(a,b)
+ ma={x=a.x + a.hitbox.x + a.hitbox.width * 0.5, y=a.y + a.hitbox.y + a.hitbox.height * 0.5}
+ mb={x=b.x + b.hitbox.x + b.hitbox.width * 0.5, y=b.y + b.hitbox.y + b.hitbox.height * 0.5}
+ return sqrt((mb.x - ma.x)*(mb.x - ma.x) + (mb.y - ma.y)*(mb.y - ma.y))
+end
+
+function injured(damage)
+ life = max(life -damage, 0)
+ if life == 0 then
+  loose_game()
+ end
+end
+
+function loose_game()
+
 end
 __gfx__
 ee9999eeee9999eeee9999eeee9999eeee9999eeee9999ee000000000000000000000000000000000000000000000000eeeeeeeeeeeeeeee0000000000000000
