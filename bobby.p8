@@ -52,15 +52,18 @@ function _init()
 	move_count = 0
 	size_switching = 0
 	opened_treasure = {}
-	opening_treasure = false
+	delay_co= nil
 end
 
 function _update()
- if opening_treasure then
-  if btn(btn_1) or btn(btn_2) then
-   opening_treasure = false
+ if delay_co then
+  if coresume(delay_co) then
+   return
+  else
+   delay_co = nil
   end
-	elseif tick%refresh_rate == 0 then
+ end
+	if tick%refresh_rate == 0 then
 		if btn(btn_1) then
 			btn1_down = true
 		elseif btn1_down == true and size_switching == 0 then
@@ -178,11 +181,21 @@ function open_treasure_if_needed()
    	move_count = 0
     current_spr = set_current_spr(spr_open_treasure)
     add(opened_treasure,cell)
-    opening_treasure = true
+    delay_co = cocreate(delay_treasure)
     -- give treasure item
     return
    end
   end
+ end
+end
+
+function delay_treasure()
+ delay(90)
+end
+
+function delay(t)
+ for i=1,t do
+  yield()
  end
 end
 
