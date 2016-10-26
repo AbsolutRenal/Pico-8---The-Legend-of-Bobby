@@ -17,6 +17,7 @@ flag_water = 1
 flag_deep_water = 2
 flag_behind = 3
 flag_treasure = 4
+flag_destroyable = 5
 refresh_rate = 2
 walking = 2
 spr_front = 0
@@ -56,7 +57,7 @@ function _init()
 	move_speed = walking
 	tick = 0
 	current_spr = 0
-	bobby = {sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=32,y=32}
+	bobby = {injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=32,y=32}
 	background_color = 3
 	move_count = 0
 	btn_1_down = false
@@ -68,6 +69,7 @@ function _init()
  hearts = 3
  current_bomb = nil
  selected_item = 1
+ map_changes = {}
 end
 
 function _update()
@@ -92,7 +94,7 @@ function _update()
 		end
 		move_bobby()
 	end
-	tick += 1
+	tick = (tick +1) % 30
 end
 
 function select_item()
@@ -240,7 +242,7 @@ function open_treasure_if_needed()
   local cells = collision_cells()
   for cell in all(cells) do
    if collide_with({cell},flag_treasure) and not treasure_is_opened(cell) then
-    spr(spr_treasure_opened,cell.x*8 + map_x,cell.y*8 + map_y)
+    mset(cell.x, cell.y, spr_treasure_opened)
     tick = 0
    	move_count = 0
     current_spr = set_current_spr(spr_open_treasure)
@@ -340,6 +342,14 @@ function collision_cells()
  return {{x=cell_min_x,y=cell_min_y,sprite=cell_min},{x=cell_max_x,y=cell_max_y,sprite=cell_max}}
 end
 
+function collision_cells_with(a)
+ min_x = flr((a.x + a.hitbox.x)/8)
+ max_x = flr((a.x + a.hitbox.x + a.hitbox.width)/8)
+ min_y = flr((a.y + a.hitbox.y)/8)
+ max_y = flr((a.y + a.hitbox.y + a.hitbox.height)/8)
+ return {{x=min_x,y=min_y,sprite=mget(min_x,min_y)},{x=max_x,y=min_y,sprite=mget(max_x,min_y)},{x=min_x,y=max_y,sprite=mget(min_x,max_y)},{x=max_x,y=max_y,sprite=mget(max_x,max_y)}}
+end
+
 function ceil(x)
 	return -flr(-x)
 end
@@ -354,10 +364,12 @@ function _draw()
 	mod_x = abs(map_x) % (cell_x * 8)
 	mod_y = abs(map_y) % (cell_y * 8)
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
-	draw_opened_treasure()
-	open_treasure_if_needed()
+ open_treasure_if_needed()
  handle_bombs()
-	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
+ bobby.injured = max(bobby.injured -1, 0)
+ if bobby.injured % 2 == 0 then
+ 	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
+ end
 	if is_on_terrain_type(flag_water) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
@@ -421,8 +433,10 @@ end
 function bomb_explode()
  local sprite = spr_bomb + flr(abs(current_bomb.count_down)/refresh_rate)
  spr(sprite,current_bomb.x + map_x,current_bomb.y + map_y)
- if current_bomb.count_down == -refresh_rate * 4 then
+ if current_bomb.count_down == 0 then 
   handle_bomb_damage()
+ elseif current_bomb.count_down == -refresh_rate * 4 then
+  current_bomb = nil
  end
 end
 
@@ -431,7 +445,12 @@ function handle_bomb_damage()
  if distance(current_bomb,bobby_map_position) < 12 then
   injured(bomb_damage)
  end
- current_bomb = nil
+ local cells = collision_cells_with(current_bomb)
+ for cell in all(cells) do
+  if fget(cell.sprite, flag_destroyable) then
+   mset(cell.x, cell.y, cell.sprite +1)
+  end
+ end
 end
 
 function distance(a,b)
@@ -442,6 +461,7 @@ end
 
 function injured(damage)
  life = max(life -damage, 0)
+ bobby.injured = 16
  if life == 0 then
   loose_game()
  end
@@ -588,7 +608,7 @@ __map__
 2021000000232300232300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002021
 3031232332230000000023232323000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003031
 2021232523230000232300252323000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002021
-3031232323230023002323232300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003031
+3031232323370023002323232300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003031
 2021002323000023002323242424000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002021
 3031000000002323002424242424240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003031
 2021000000000024242424343434342424000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002021
