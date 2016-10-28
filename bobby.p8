@@ -22,6 +22,7 @@ state_loose = 3
 spr_front = 0
 spr_back = 2
 spr_side = 4
+spr_dive = 6
 spr_standing = 16
 spr_open_treasure = 17
 spr_swim_front = 18
@@ -73,6 +74,7 @@ alpha_color = 14
 refresh_rate = 2
 walking = 2
 running = 4
+max_diving_delay = 60
 screen_offset = 8
 map_max_x = 112 * 8 -- nb columns * column width
 map_max_y = 48 * 8
@@ -90,10 +92,11 @@ function _init()
 	move_speed = walking
 	tick = 0
 	current_spr = 0
-	bobby = {injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
+	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
 	background_color = 3
 	move_count = 0
 	btn_1_down = false
+	btn_2_down = false
 	items = {}
 	opened_treasure = {}
 	delay_co= nil
@@ -166,6 +169,8 @@ function handle_game_update()
 		move_speed = walking
 		if btn(btn_2) then
 			use_item()
+		else
+		 stop_item()
 		end
 		if btn(btn_1) then
 		 select_item()
@@ -210,11 +215,19 @@ end
 function use_item()
  if item_available(spr_boots) then
   move_speed = running
+ elseif item_available(spr_flipper) and is_on_terrain_type(flag_deep_water) and not btn_2_down then
+  bobby.dive = max_diving_delay
  elseif item_available(spr_bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
  elseif item_available(spr_gps) then
   state = state_gps
  end
+ btn_2_down = true
+end
+
+function stop_item()
+ bobby.dive = 0
+ btn_2_down = false
 end
 
 function move_bobby()
@@ -241,8 +254,13 @@ function config_bobby(sx,sy)
  local water = (sx==0 and sy==0) and spr_water_standing or spr_water_walk
  if is_on_terrain_type(flag_deep_water) then
   move_speed = 1
-  orientation = swimming_sprite(sx,sy)
+  if bobby.dive > 0 then
+   orientation = spr_dive
+  else
+   orientation = swimming_sprite(sx,sy)
+  end
  else
+  bobby.dive = 0
   orientation = walking_sprite(sx,sy)
  end
  
@@ -475,6 +493,9 @@ function draw_game()
  open_treasure_if_needed()
  handle_bombs()
  bobby.injured = max(bobby.injured -1, 0)
+ if bobby.dive > 0 then
+  bobby.dive -= 1
+ end
  if bobby.injured % 2 == 0 then
  	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
  end
@@ -590,22 +611,22 @@ function loose_game()
 
 end
 __gfx__
-ee9999eeee9999eeee9999eeee9999eeee9999eeee9999ee00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000
-ee9ff9eeee9ff9eeee9999eeee9999eeee99feeeee99feee00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000
-eeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeee00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000
-ee88888ee88888eeee88888ee88888eeee888eeeeee88fee00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeee7eeeee7e0000000000000000
-e88888feef88888ee88888feef88888eeef88feeeee8feee00000000000000000000000000000000eeeeeeeeeeeeeeeee7eeeee7eeeeeeee0000000000000000
-ef1111eeee1111feef1111eeee1111feeee111eeeee11eee00000000000000000000000000000000eee00000000000eeeeee7eeeee7eeeee0000000000000000
-ee5ee1eeee1ee5eeee5ee1eeee1ee5eeeee1e5eee5111eee00000000000000000000000000000000ee009aa999aa900e7eceecceeceeccee0000000000000000
-eeeee5eeee5eeeeeeeeee5eeee5eeeeeeee5eeeeeeee5eee00000000000000000000000000000000e0099aa999aa9900eedcddeeeecdddee0000000000000000
-ee9999eeee9999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000ee00000000000000000000000000000000000000000000000
-ee9ff9eeef9ff9feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a99a0ee0099aa000aa990000000000000000000000000000000000
-eeeffeeee8effe8eeee99eeeeee99eeeeee99eeeeee99eeeeee99eeeeee99eeee000000ee055550ee0099a05550a990000000000000000000000000000000000
-ee8888eee888888eee9999eeee9999eeee9999eeee9999eeee9999eeee9999ee00a99a0000555500e0099a05550a990000000000000000000000000000000000
-e888888eee8888eeee9ff9eeee9ff9eeee9999eeef9999feee99feeeee99feee0000000000000000e0099aa050aa990000000000000000000000000000000000
-ef1111feee1111eeee8ff8eeeeeffeeeeeeffeeeee8ff8eeeee8eeeeeee8efee09a00a9009a00a90e0099aa050aa990000000000000000000000000000000000
-ee1ee1eeee1ee1eeefeeeefeeefeefeeeeeeeeeeeeeeeeeeeeeefeeeeeeeeeee09aaaa9009aaaa90e0099aa000aa990000000000000000000000000000000000
-ee5ee5eeee5ee5eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000e00000000000000000000000000000000000000000000000
+ee9999eeee9999eeee9999eeee9999eeee9999eeee9999eeeeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000ee
+ee9ff9eeee9ff9eeee9999eeee9999eeee99feeeee99feeeeeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00aaa222aaa00e
+eeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeeeeee555eeeee555ee0000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0099aaaaaaa9900
+ee88888ee88888eeee88888ee88888eeee888eeeeee88feeee55ee5eee5e555e0000000000000000eeeeeeeeeeeeeeeeeeeeeeee7eeeee7ee000000000000000
+e88888feef88888ee88888feef88888eeef88feeeee8feeeee5e555eee55555e0000000000000000eeeeeeeeeeeeeeeee7eeeee7eeeeeeeee000000222000000
+ef1111eeee1111feef1111eeee1111feeee111eeeee11eeeeee555eeeee555ee0000000000000000eee00000000000eeeeee7eeeee7eeeeee002222222222200
+ee5ee1eeee1ee5eeee5ee1eeee1ee5eeeee1e5eee5111eeeeeeeeeeeeeeeeeee0000000000000000ee009aa222aa900e7eceecceeceecceee022222222222220
+eeeee5eeee5eeeeeeeeee5eeee5eeeeeeee5eeeeeeee5eeeeeeeeeeeeeeeeeee0000000000000000e00299aaaaa99200eedcddeeeecdddeee002222222222200
+ee9999eeee9999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000ee0000000000000000000000000000000e000000000000000
+ee9ff9eeef9ff9feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a99a0ee0099aa000aa99000000000000000000e0029aa000aa9200
+eeeffeeee8effe8eeee99eeeeee99eeeeee99eeeeee99eeeeee99eeeeee99eeee000000ee055550ee0029a02220a92000000000000000000e0029a02220a9200
+ee8888eee888888eee9999eeee9999eeee9999eeee9999eeee9999eeee9999ee00a99a0000555500e0029a02220a92000000000000000000e0029a02220a9200
+e888888eee8888eeee9ff9eeee9ff9eeee9999eeef9999feee99feeeee99feee0000000000000000e0029aa020aa92000000000000000000e0029aa020aa9200
+ef1111feee1111eeee8ff8eeeeeffeeeeeeffeeeee8ff8eeeee8eeeeeee8efee09a00a9009a00a90e0029aa020aa92000000000000000000e0029aa020aa9200
+ee1ee1eeee1ee1eeefeeeefeeefeefeeeeeeeeeeeeeeeeeeeeeefeeeeeeeeeee09aaaa9009aaaa90e00229a000a922000000000000000000e00229a000a92200
+ee5ee5eeee5ee5eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000e0000000000000000000000000000000e000000000000000
 eeeeeeeeeeeeeeeeeeeeeeee33333333dddddddddddcdccdeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee77eeee77eeeeeeeeee0e0eeeeee000ee00000000
 eeeee555b5b5eeeeee5555ee33a33333dddcdddddddddddde000eeeeee0e0eeeee0e0eeeee0e0eeeee0e0eee7eeeeee7eeeeeeeee08080eeee05850e00000000
 eee553bbbbb55eeee5bb8b5e3a3a3333dccdcddddddddddde04d0eeee08080eee0e0e0eee0e0e0eee0e0e0eeeeeeeeeeeeeeeeee08e8e80ee058885000000000
@@ -719,7 +740,7 @@ eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eee
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 __gff__
-0000000000000000000051000000000000000000000000001111000000000000080801000202000000000000000000000101010004040021000000000000000000000000000000000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
+0000000000000000000051510000515100000000000000001111515100005151080801000202000000000000000000000101010004040021000000000000000000000000000000000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 3434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434340000000000000000000000000034343434000000000000000000000000000000000000000000000000000000000000000000000000000000000034343434
