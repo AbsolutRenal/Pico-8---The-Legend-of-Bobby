@@ -80,7 +80,7 @@ map_max_x = 112 * 8 -- nb columns * column width
 map_max_y = 48 * 8
 map_move_offset = 32
 heart_value = 3
-treasures = {{x=19,y=18,sprite=spr_boots},{x=17,y=7,sprite=spr_bomb},{x=11,y=23,sprite=spr_flipper},{x=11,y=28,sprite=spr_heart_increment},{x=28,y=12,sprite=heart_full},{x=11,y=10,sprite=spr_gps}}
+treasures = {{x=19,y=18,sprite=spr_boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=spr_bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=spr_flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=spr_heart_increment},{x=28,y=12,sprite=heart_full},{x=11,y=10,sprite=spr_gps,descript={x=13,text="you now have access to map"}}}
 
 -- func
 function _init()
@@ -98,7 +98,6 @@ function _init()
 	btn_1_down = false
 	btn_2_down = false
 	items = {}
-	opened_treasure = {}
 	delay_co= nil
  should_draw = true
  life = 9
@@ -346,7 +345,7 @@ function open_treasure_if_needed()
  if bobby.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
-   if collide_with({cell},flag_treasure) and not treasure_is_opened(cell) then
+   if collide_with({cell},flag_treasure) then
     mset(cell.x, cell.y, spr_treasure_opened)
     spr(spr_treasure_opened, cell.x * 8 + map_x, cell.y * 8 + map_y)
    	move_count = 0
@@ -370,7 +369,11 @@ function activate_treasure(cell)
    if not one_shot_item(t.sprite) then
     add(items,t)
    end
-   add(opened_treasure,t)
+   spr(t.sprite,bobby.x, bobby.y - 10)
+   if t.descript != nil then
+    rectfill(3,100,124,116,0)
+    print(t.descript.text,t.descript.x,106,7)
+   end
    delay_co = cocreate(delay_treasure)
    return
   end
@@ -378,20 +381,9 @@ function activate_treasure(cell)
 end
 
 function delay_treasure()
- local sprite = opened_treasure[count(opened_treasure)].sprite
  for i=1,90 do
-  spr(sprite,bobby.x, bobby.y - 10)
   yield()
  end
-end
-
-function treasure_is_opened(cell)
- for opened in all(opened_treasure) do
-  if cell.x == opened.x and cell.y == opened.y then
-   return true
-  end
- end
- return false
 end
 
 function current_overlaped_cells()
@@ -740,7 +732,7 @@ eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eee
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 __gff__
-0000000000000000000051510000515100000000000000001111515100005151080801000202000000000000000000000101010004040021000000000000000000000000000000000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
+0000000000000000000051510000515100000000000000001101515100005151080801000202000000000000000000000101010004040021000000000000000000000000000000000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 3434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434340000000000000000000000000034343434000000000000000000000000000000000000000000000000000000000000000000000000000000000034343434
