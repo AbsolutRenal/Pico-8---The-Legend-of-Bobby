@@ -217,35 +217,35 @@ function handle_game_update()
 end
 
 function teleport_anim(idx)
- draw_teleport_anim(true)
+ teleport_bobby_stretch(true)
  teleport_bobby_to(teleports[idx])
- draw_teleport_anim(false)
+ teleport_bobby_stretch(false)
 end
 
-function draw_teleport_anim(out)
+function teleport_bobby_stretch(out)
  if out then
   anim={width=8,height=8}
   while anim.width > 0 do
-	  draw_map()
 	  anim.width -= 2
 	  anim.height += 4
-	  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
-	  animate_textures()
-   draw_hud()
-	  yield()
+	  draw_teleport_anim()
 	 end
 	else
 	 anim={width=0,height=24}
 		while anim.width < 8 do
-	  draw_map()
 	  anim.width += 2
 	  anim.height -= 4
-	  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
-	  animate_textures()
-   draw_hud()
-	  yield()
+	  draw_teleport_anim()
 	 end
 	end
+end
+
+function draw_teleport_anim()
+ draw_map()
+ sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
+ animate_textures()
+ draw_hud()
+ yield()
 end
 
 function teleport_bobby_to(p)
