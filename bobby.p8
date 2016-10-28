@@ -193,7 +193,8 @@ function handle_game_update()
 	    if idx > count(teleports) then
 	     idx = 1
 	    end
-	    teleport_bobby_to(teleports[idx])
+	    delay_co = cocreate(teleport_anim)
+	    coresume(delay_co,idx)
 	    return
 	   end
 	  end
@@ -213,6 +214,38 @@ function handle_game_update()
 		move_bobby()
 	end
 	tick = (tick +1)%3000
+end
+
+function teleport_anim(idx)
+ draw_teleport_anim(true)
+ teleport_bobby_to(teleports[idx])
+ draw_teleport_anim(false)
+end
+
+function draw_teleport_anim(out)
+ if out then
+  anim={width=8,height=8}
+  while anim.width > 0 do
+	  draw_map()
+	  anim.width -= 2
+	  anim.height += 4
+	  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
+	  animate_textures()
+   draw_hud()
+	  yield()
+	 end
+	else
+	 anim={width=0,height=24}
+		while anim.width < 8 do
+	  draw_map()
+	  anim.width += 2
+	  anim.height -= 4
+	  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
+	  animate_textures()
+   draw_hud()
+	  yield()
+	 end
+	end
 end
 
 function teleport_bobby_to(p)
@@ -435,14 +468,15 @@ function activate_treasure(cell)
     rectfill(3,100,124,116,0)
     print(t.descript.text,t.descript.x,106,7)
    end
-   delay_co = cocreate(delay_treasure)
+   delay_co = cocreate(delay)
+   coresume(delay_co,90)
    return
   end
  end
 end
 
-function delay_treasure()
- for i=1,90 do
+function delay(n)
+ for i=1,n do
   yield()
  end
 end
@@ -537,15 +571,26 @@ function draw_game()
  if not should_draw then
   return
  end
-	rectfill(0, 0, 127, 127, background_color)
+	draw_map()
+	open_treasure_if_needed()
+ handle_bombs()
+ bobby.injured = max(bobby.injured -1, 0)
+ draw_bobby()
+ animate_textures()
+	draw_background_if_behind()
+ draw_hud()
+end
+
+function draw_map()
+ rectfill(0, 0, 127, 127, background_color)
 	cell_x = flr(map_x / -8)
 	cell_y = flr(map_y / -8)
 	mod_x = abs(map_x) % (cell_x * 8)
 	mod_y = abs(map_y) % (cell_y * 8)
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
- open_treasure_if_needed()
- handle_bombs()
- bobby.injured = max(bobby.injured -1, 0)
+end
+
+function draw_bobby()
  if bobby.dive > 0 then
   bobby.dive -= 1
  end
@@ -555,9 +600,6 @@ function draw_game()
 	if is_on_terrain_type(flag_water) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
- animate_textures()
-	draw_background_if_behind()
- draw_hud()
 end
 
 function animate_textures()
