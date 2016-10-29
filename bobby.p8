@@ -713,22 +713,12 @@ function injured(damage)
 end
 
 function loose_game()
- --delay_co = cocreate(loose_animation)
- 
+ state = state_loose
+ --sfx(3)
 end
 
 function loose_animation()
- local colors = {7,6,5,0}
- local size = 8
- local n = 1
- local c = count(colors)
- while n <= 16 do
-  for j=n,1,-1 do
-   rectfill((j-1)*8, 120, j*8, 128, colors[min(c,j)])
-  end
-  n += 1
-  yield()
- end
+ 
 end
 __gfx__
 ee9999eeee9999eeee9999eeee9999eeee9999eeee9999eeeeeeeeeeeeeeeeeeaafaaaaaaafaaaaaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000ee
