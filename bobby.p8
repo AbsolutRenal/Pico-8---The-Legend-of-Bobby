@@ -242,7 +242,7 @@ end
 
 function draw_teleport_anim()
  draw_map()
- sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + (8-anim.height)*0.5, anim.width, anim.height)
+ sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
  animate_textures()
  draw_hud()
  yield()
