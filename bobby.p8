@@ -91,6 +91,10 @@ treasures = {{x=19,y=18,sprite=spr_boots,descript={x=34,text="you can now run"}}
 
 -- func
 function _init()
+ new_game()
+end
+
+function init_game()
 	--poke(0x5f2c,7)
 	palt(0,false)
 	palt(alpha_color,true)
@@ -184,6 +188,7 @@ function _update()
  elseif state == state_gps then
   handle_gps_update()
  end
+	tick = (tick +1)%3000
 end
 
 function handle_game_update()
@@ -216,7 +221,6 @@ function handle_game_update()
 		end
 		move_bobby()
 	end
-	tick = (tick +1)%3000
 end
 
 function teleport_anim(idx)
@@ -246,6 +250,7 @@ end
 
 function draw_teleport_anim()
  draw_map()
+ handle_bombs()
  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
  animate_textures()
  draw_hud()
@@ -558,6 +563,8 @@ function _draw()
   draw_game()
  elseif state == state_gps then
   draw_gps()
+ elseif state == state_loose then
+  draw_display(false,new_game)
  end
  update_gps_data()
 end
@@ -706,19 +713,49 @@ end
 
 function injured(damage)
  life = max(life -damage, 0)
- bobby.injured = 16
  if life == 0 then
   loose_game()
+ else
+  bobby.injured = 16
  end
 end
 
 function loose_game()
+ tick = 0
  state = state_loose
- --sfx(3)
+ sfx(3)
 end
 
-function loose_animation()
+function draw_display(open,completion)
+ handle_bombs()
+ draw_bobby()
+ animate_textures()
+	draw_background_if_behind()
  
+ local colors = {0,5,6,7}
+ local c = count(colors)
+ local l = tick%32
+ for i=15,0,-1 do
+  for n=1,c do
+   if open then
+    rectfill((l-i+n-c)*8, i*8, 128, (i+1)*8, colors[c+1-n])
+   else
+    rectfill(0, i*8, (l-i-n+c)*8, (i+1)*8, colors[n])
+   end
+  end
+ end
+ if l == 31 then
+  completion()
+ end
+end
+
+function new_game()
+ init_game()
+ draw_display(true,launch)
+end
+
+function launch()
+ state = state_game
 end
 __gfx__
 ee9999eeee9999eeee9999eeee9999eeee9999eeee9999eeeeeeeeeeeeeeeeeeaafaaaaaaafaaaaaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000ee
