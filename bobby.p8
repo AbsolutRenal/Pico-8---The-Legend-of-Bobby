@@ -14,9 +14,10 @@ btn_2 = 4
 
 -- game states
 state_menu = 0
-state_game = 1
-state_gps = 2
-state_loose = 3
+state_opening = 1
+state_game = 2
+state_gps = 3
+state_loose = 4
 
 -- sprites
 spr_front = 0
@@ -30,6 +31,7 @@ spr_swim_back = 20
 spr_swim_side = 22
 spr_water_walk = 12
 spr_water_standing = 44
+spr_dead = 63
 spr_water = 36
 spr_deep_water = 52
 spr_water2 = 37
@@ -38,8 +40,10 @@ spr_sand = 51
 spr_small_tree = 34
 spr_rock1 = 50
 spr_rock2 = 55
+spr_rock2_broken = 56
 spr_rock3 = 47
 spr_rock4 = 8
+spr_rock4_broken = 9
 spr_tree1 = 32
 spr_tree2 = 33
 spr_tree3 = 48
@@ -50,13 +54,18 @@ spr_treasure3 = 24
 spr_treasure4 = 25
 spr_treasure5 = 26
 spr_treasure6 = 27
+spr_treasure = 14
 spr_treasure7 = 28
 spr_teleport1 = 64
 spr_teleport2 = 65
 heart_full = 39
 heart_empty = 42
-spr_big_treasure_opened = 10
+spr_big_treasure_opened1 = 14
+spr_big_treasure_opened2 = 15
+spr_big_treasure_opened3 = 30
+spr_big_treasure_opened4 = 31
 spr_treasure_opened = 25
+spr_treasure_sand_opened = 29
 spr_selected_item = 43
 spr_boots = 38
 spr_flipper = 54
@@ -96,13 +105,13 @@ end
 
 function init_game()
 	--poke(0x5f2c,7)
+	move_speed = walking
 	palt(0,false)
 	palt(alpha_color,true)
 	map_x = 0
 	map_y = 0
-	move_speed = walking
 	tick = 0
-	current_spr = 0
+	current_spr = spr_standing
 	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
 	background_color = 3
 	move_count = 0
@@ -115,7 +124,6 @@ function init_game()
  hearts = 3
  current_bomb = nil
  selected_item = 1
- state = state_game
  map_data = {}
  create_gps_map()
  detect_teleports()
@@ -137,6 +145,21 @@ function detect_teleports()
    s = mget(i,j)
    if fget(s,flag_teleport) then
     add(teleports,{x=i,y=j})
+   end
+  end
+ end
+end
+
+function reinit_map_items()
+ local s
+ local items = {{from=spr_big_treasure_opened1,to=spr_treasure1},{from=spr_big_treasure_opened2,to=spr_treasure2},{from=spr_big_treasure_opened3,to=spr_treasure5},{from=spr_big_treasure_opened4,to=spr_treasure6},{from=spr_treasure_opened,to=spr_treasure3},{from=spr_treasure_sand_opened,to=spr_treasure7},{from=spr_rock2_broken,to=spr_rock2},{from=spr_rock4_broken,to=spr_rock4}}
+ for j=0,127 do
+  for i=0,127 do
+   s = mget(i,j)
+   for item in all(items) do
+    if s == item.from then
+     mset(i,j,item.to)
+    end
    end
   end
  end
@@ -559,7 +582,9 @@ function ceil(x)
 end
 
 function _draw()
- if state == state_game then
+ if state == state_opening then
+  draw_display(true,launch)
+ elseif state == state_game then
   draw_game()
  elseif state == state_gps then
   draw_gps()
@@ -722,23 +747,28 @@ end
 
 function loose_game()
  tick = 0
+ current_spr = spr_dead
  state = state_loose
  sfx(3)
 end
 
 function draw_display(open,completion)
+ draw_map()
  handle_bombs()
  draw_bobby()
  animate_textures()
 	draw_background_if_behind()
+	draw_hud()
  
- local colors = {0,5,6,7}
+ --local colors = {0,5,6,7}
+ --local colors = {7,6,5,0}
+ local colors = {10,12,8,1}
  local c = count(colors)
  local l = tick%32
  for i=15,0,-1 do
   for n=1,c do
    if open then
-    rectfill((l-i+n-c)*8, i*8, 128, (i+1)*8, colors[c+1-n])
+    rectfill((l-i+n-c)*8, i*8, 128, (i+1)*8, colors[n])
    else
     rectfill(0, i*8, (l-i-n+c)*8, (i+1)*8, colors[n])
    end
@@ -750,8 +780,9 @@ function draw_display(open,completion)
 end
 
 function new_game()
+ state = state_opening
  init_game()
- draw_display(true,launch)
+ reinit_map_items()
 end
 
 function launch()
@@ -762,10 +793,10 @@ ee9999eeee9999eeee9999eeee9999eeee9999eeee9999eeeeeeeeeeeeeeeeeeaafaaaaaaafaaaaa
 ee9ff9eeee9ff9eeee9999eeee9999eeee99feeeee99feeeeeeeeeeeeeeeeeeeaa55555aaaaaf7aaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00aaa222aaa00e
 eeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeeeeeeffeeeeee555eeeee555ee71555d1a7aaad5aaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0099aaaaaaa9900
 ee88888ee88888eeee88888ee88888eeee888eeeeee88feeee55ee5eee5e555ea51511d5aa5aaddaeeeeeeeeeeeeeeeeeeeeeeee7eeeee7ee000000000000000
-e88888feef88888ee88888feef88888eeef88feeeee8feeeee5e555eee55555ea551dd15adaaaaa7eeeeeeeeeeeeeeeee7eeeee7eeeeeeeee000000222000000
-ef1111eeee1111feef1111eeee1111feeee111eeeee11eeeeee555eeeee555eea5511551aa5a5aa5eee00000000000eeeeee7eeeee7eeeeee002222222222200
-ee5ee1eeee1ee5eeee5ee1eeee1ee5eeeee1e5eee5111eeeeeeeeeeeeeeeeeeeaf15d15aafada5aaee009aa222aa900e7eceecceeceecceee022222222222220
-eeeee5eeee5eeeeeeeeee5eeee5eeeeeeee5eeeeeeee5eeeeeeeeeeeeeeeeeeeaaaaf7aaaaaaf7aae00299aaaaa99200eedcddeeeecdddeee002222222222200
+e88888feef88888ee88888feef88888eeef88feeeee8feeeee5e555eee55555ea551dd15adaaaaa7eeeeeeeeeeeeeeeee7eeeee7eeeeeeeee00000022200000e
+ef1111eeee1111feef1111eeee1111feeee111eeeee11eeeeee555eeeee555eea5511551aa5a5aa5eee00000000000eeeeee7eeeee7eeeeeee0222222222220e
+ee5ee1eeee1ee5eeee5ee1eeee1ee5eeeee1e5eee5111eeeeeeeeeeeeeeeeeeeaf15d15aafada5aaee009aa222aa900e7eceecceeceecceeeee00022222000ee
+eeeee5eeee5eeeeeeeeee5eeee5eeeeeeee5eeeeeeee5eeeeeeeeeeeeeeeeeeeaaaaf7aaaaaaf7aae00299aaaaa99200eedcddeeeecdddeeee0222222222220e
 ee9999eeee9999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000ee000000000000000aafaaaaaa000000ae000000000000000
 ee9ff9eeef9ff9feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a99a0ee0099aa000aa9900aaaaf7aaa0a99a0ae0029aa000aa9200
 eeeffeeee8effe8eeee99eeeeee99eeeeee99eeeeee99eeeeee99eeeeee99eeee000000ee055550ee0029a02220a92007000000a7055550ae0029a02220a9200
@@ -782,14 +813,14 @@ e5333bbbbbbbbbeeb378bb7533333333ddddddddccdcdddde04d0eeeee080eeeee080eeeee080eee
 e533b3bbbbbbbb5ebbbb78b533333733dddddcdddddddddde04000eeeee0eeeeeee0eeeeeee0eeeeeee0eeeeeeeeeeeeeeeeeeeeee080eeeee40004e1dd66d11
 e533bbbbbbbbbb5e58b8bbb533337373ddddcdccdddddddde044440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7eeeeee7eecdcdeeeee0eeeeeee444eea111111a
 e5333bbbbbbbbbbee5bbbb5e33333733ddddddddddddcddde000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee77eeee77eedcdceeeeeeeeeeeeeeeeeeaaaaf7aa
-e533b3bbbbbbbb5eeeeeeeeeaafaaaaa11111111111c1cc1eeeeeeeeeeeeeeeeeeeeeeeeeeeeaeaeeeeeeeeeeeaeae6eeeaeae6e5e6ee5eeeeeeeeee00000000
-e5333b33b3bb35eeeee11eeeaaaaf7aa111c111111111111e5eeeeeeee55555eeeeeeeeeeeee09eeee7777eeea766ae6eae66ae6e66e5ee5eeeeeeee00000000
-ee553bb3333355eee11dd11e7aaaaaaa1cc1c111111111115d5eeeeee1555d1eeeeed5eeeee0eeaee777777ea679977aa6e99eeaeaeeee65eee555ee00000000
-eeee53333b35eeee1d666d1eaaaaafaa1111111111c111115dd5eeeee51511d5ee5eeddeee555eeee777777ee977796ae9eee96aeeeeee6eeee5e5ee00000000
-eeeee554455eeeee1d666dd1aaaaaaa711111111cc1c1111e55c5c5ce551dd15edeeeeeee57555eee777777ee697676ee69e6e6eee5eeeeeeeee5eee00000000
-eeeeeee24eeeeeee1dd66d11aa7aaaaa11111c1111111111eec5c5c5e5511551ee5e5ee5e57555eee777777ea767777eae6eeeeee6eeee6eeeee5eee00000000
-eeeeeee24eeeeeeee111111eafaaaaaa1111c1cc11111111eeec5c5eee15d15eeeede5eee55575eeee7777eeae9799aeae9e99ae5eee6e5eeee55eee00000000
-eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eeeeeeeeeeeeae96aaeeae96aaeeeeaeeeeeeeeeeee00000000
+e533b3bbbbbbbb5eeeeeeeeeaafaaaaa11111111111c1cc1eeeeeeeeeeeeeeeeeeeeeeeeeeeeaeaeeeeeeeeeeeaeae6eeeaeae6e5e6ee5eeeeeeeeeeeeeeeeee
+e5333b33b3bb35eeeee11eeeaaaaf7aa111c111111111111e5eeeeeeee55555eeeeeeeeeeeee09eeee7777eeea766ae6eae66ae6e66e5ee5eeeeeeeeeeeeeeee
+ee553bb3333355eee11dd11e7aaaaaaa1cc1c111111111115d5eeeeee1555d1eeeeed5eeeee0eeaee777777ea679977aa6e99eeaeaeeee65eee555eeeeeeeeee
+eeee53333b35eeee1d666d1eaaaaafaa1111111111c111115dd5eeeee51511d5ee5eeddeee555eeee777777ee977796ae9eee96aeeeeee6eeee5e5eeeeef8899
+eeeee554455eeeee1d666dd1aaaaaaa711111111cc1c1111e55c5c5ce551dd15edeeeeeee57555eee777777ee697676ee69e6e6eee5eeeeeeeee5eeee5118899
+eeeeeee24eeeeeee1dd66d11aa7aaaaa11111c1111111111eec5c5c5e5511551ee5e5ee5e57555eee777777ea767777eae6eeeeee6eeee6eeeee5eee51118899
+eeeeeee24eeeeeeee111111eafaaaaaa1111c1cc11111111eeec5c5eee15d15eeeede5eee55575eeee7777eeae9799aeae9e99ae5eee6e5eeee55eeeeeeee8fe
+eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eeeeeeeeeeeeae96aaeeae96aaeeeeaeeeeeeeeeeeeeeeeeeee
 55555555555555550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 50000005500000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 50d2d205509a9a050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
