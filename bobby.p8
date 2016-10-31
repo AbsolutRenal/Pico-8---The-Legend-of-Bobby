@@ -17,7 +17,8 @@ state_menu = 0
 state_opening = 1
 state_game = 2
 state_gps = 3
-state_loose = 4
+state_dead = 4
+state_loose = 5
 
 -- sprites
 spr_front = 0
@@ -204,6 +205,9 @@ function _update()
    should_draw = true
    delay_co = nil
   end
+ end
+ if loose_co and not coresume(loose_co) then
+  loose_co = nil
  end
  
  if state == state_game then
@@ -508,9 +512,12 @@ function activate_treasure(cell)
  end
 end
 
-function delay(n)
+function delay(n,completion)
  for i=1,n do
   yield()
+ end
+ if completion != nil then
+  completion()
  end
 end
 
@@ -588,10 +595,23 @@ function _draw()
   draw_game()
  elseif state == state_gps then
   draw_gps()
+ elseif state == state_dead then
+  draw_dead_state()
  elseif state == state_loose then
   draw_display(false,new_game)
  end
  update_gps_data()
+end
+
+function draw_dead_state()
+	draw_map()
+ handle_bombs()
+ draw_bobby()
+ animate_textures()
+	draw_background_if_behind()
+	draw_hud()
+ rectfill(3,100,124,116,1)
+ print("˜ you loose ˜",36,106,8)
 end
 
 function draw_gps()
@@ -739,15 +759,21 @@ end
 function injured(damage)
  life = max(life -damage, 0)
  if life == 0 then
-  loose_game()
+  kill_bobby()
  else
   bobby.injured = 16
  end
 end
 
+function kill_bobby()
+ current_spr = spr_dead
+ state = state_dead
+ loose_co = cocreate(delay)
+ coresume(loose_co,120,loose_game)
+end
+
 function loose_game()
  tick = 0
- current_spr = spr_dead
  state = state_loose
  sfx(3)
 end
