@@ -13,13 +13,14 @@ btn_1 = 5
 btn_2 = 4
 
 -- game states
-state_menu = 0
-state_opening = 1
-state_game = 2
-state_gps = 3
-state_dead = 4
-state_loose = 5
-
+game_state = {
+	state_menu = 0,
+	state_opening = 1,
+	state_game = 2,
+	state_gps = 3,
+	state_dead = 4,
+	state_loose = 5
+}
 -- sprites
 spr_front = 0
 spr_back = 2
@@ -124,7 +125,7 @@ function init_game()
  life = 9
  hearts = 3
  current_bomb = nil
- keys = 1
+ keys = 0
  selected_item = 1
  map_data = {}
  create_gps_map()
@@ -211,9 +212,9 @@ function _update()
   loose_co = nil
  end
  
- if state == state_game then
+ if state == game_state.state_game then
   handle_game_update()
- elseif state == state_gps then
+ elseif state == game_state.state_gps then
   handle_gps_update()
  end
 	tick = (tick +1)%3000
@@ -309,7 +310,7 @@ end
 
 function handle_gps_update()
  if not btn(btn_2) then
-  state = state_game
+  state = game_state.state_game
  end
 end
 
@@ -345,7 +346,7 @@ function use_item()
  elseif item_available(spr_bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
  elseif item_available(spr_gps) then
-  state = state_gps
+  state = game_state.state_gps
  end
  btn_2_down = true
 end
@@ -618,15 +619,15 @@ function ceil(x)
 end
 
 function _draw()
- if state == state_opening then
+ if state == game_state.state_opening then
   draw_display(true,launch)
- elseif state == state_game then
+ elseif state == game_state.state_game then
   draw_game()
- elseif state == state_gps then
+ elseif state == game_state.state_gps then
   draw_gps()
- elseif state == state_dead then
+ elseif state == game_state.state_dead then
   draw_dead_state()
- elseif state == state_loose then
+ elseif state == game_state.state_loose then
   draw_display(false,new_game)
  end
  update_gps_data()
@@ -797,14 +798,14 @@ end
 
 function kill_bobby()
  current_spr = spr_dead
- state = state_dead
+ state = game_state.state_dead
  loose_co = cocreate(delay)
  coresume(loose_co,120,loose_game)
 end
 
 function loose_game()
  tick = 0
- state = state_loose
+ state = game_state.state_loose
  sfx(3)
 end
 
@@ -836,13 +837,13 @@ function draw_display(open,completion)
 end
 
 function new_game()
- state = state_opening
+ state = game_state.state_opening
  init_game()
  reinit_map_items()
 end
 
 function launch()
- state = state_game
+ state = game_state.state_game
 end
 __gfx__
 ee9999eeee9999eeee9999eeee9999eeee9999eeee9999eeeeeeeeeeeeeeeeeeaafaaaaaaafaaaaaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000ee
