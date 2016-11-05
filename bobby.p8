@@ -537,7 +537,7 @@ function activate_treasure(cell)
     print(t.descript.text,t.descript.x,106,7)
    end
    delay_co = cocreate(delay)
-   coresume(delay_co,90)
+   coresume(delay_co,45)
    return
   end
  end
