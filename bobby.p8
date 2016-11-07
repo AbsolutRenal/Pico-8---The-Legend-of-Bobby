@@ -76,6 +76,7 @@ spr_gps = 46
 spr_bomb = 57
 bomb_damage = 3
 spr_key = 62
+spr_candle = 66
 
 -- flags 
 flag_solid = 0
@@ -478,33 +479,42 @@ function open_treasure_if_needed()
  if bobby.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
-   if collide_with({cell},flag_treasure) and collide_with({cell},flag_need_key) and keys > 0 then
-    sfx(2)
-    if fget(mget(cell.x-1,cell.y), flag_treasure) then
-     spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-   	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
-     spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-   	 mset(cell.x,cell.y-1,spr_big_treasure_opened2)
-     spr(spr_big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
-   	 mset(cell.x-1,cell.y,spr_big_treasure_opened3)
-     spr(spr_big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
-   	 mset(cell.x,cell.y,spr_big_treasure_opened4)
+   if collide_with({cell},flag_treasure) and collide_with({cell},flag_need_key) then
+    if keys > 0 then
+     sfx(2)
+     if fget(mget(cell.x-1,cell.y), flag_treasure) then
+      spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
+      spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,spr_big_treasure_opened2)
+      spr(spr_big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x-1,cell.y,spr_big_treasure_opened3)
+      spr(spr_big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,spr_big_treasure_opened4)
+     else
+      spr(spr_big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,spr_big_treasure_opened1)
+      spr(spr_big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x+1,cell.y-1,spr_big_treasure_opened2)
+      spr(spr_big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,spr_big_treasure_opened3)
+      spr(spr_big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x+1,cell.y,spr_big_treasure_opened4)
+     end
+     keys -= 1
+     move_count = 0
+     current_spr = set_current_spr(spr_open_treasure)
+     water_spr = spr_water_standing
+     activate_treasure(cell)
+     return
     else
-     spr(spr_big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-   	 mset(cell.x,cell.y-1,spr_big_treasure_opened1)
-     spr(spr_big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-   	 mset(cell.x+1,cell.y-1,spr_big_treasure_opened2)
-     spr(spr_big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
-   	 mset(cell.x,cell.y,spr_big_treasure_opened3)
-     spr(spr_big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
-   	 mset(cell.x+1,cell.y,spr_big_treasure_opened4)
+     draw_text("hum... i need a key !",25,0,7)
+     current_spr = spr_standing
+     draw_bobby()
+     delay_co = cocreate(delay)
+     coresume(delay_co,45)
+     return
     end
-    keys -= 1
-    move_count = 0
-    current_spr = set_current_spr(spr_open_treasure)
-    water_spr = spr_water_standing
-    activate_treasure(cell)
-    return
    elseif collide_with({cell},flag_treasure) and not collide_with({cell},flag_need_key) then
     sfx(2)
     mset(cell.x, cell.y, cell.sprite +1)
@@ -533,14 +543,18 @@ function activate_treasure(cell)
    end
    spr(t.sprite,bobby.x, bobby.y - 10)
    if t.descript != nil then
-    rectfill(3,100,124,116,0)
-    print(t.descript.text,t.descript.x,106,7)
+    draw_text(t.descript.text,t.descript.x,0,7)
    end
    delay_co = cocreate(delay)
    coresume(delay_co,45)
    return
   end
  end
+end
+
+function draw_text(text,x,bg_col,col)
+ rectfill(3,100,124,116,bg_col)
+ print(text,x,106,col)
 end
 
 function delay(n,completion)
@@ -641,8 +655,7 @@ function draw_dead_state()
  animate_textures()
 	draw_background_if_behind()
 	draw_hud()
- rectfill(3,100,124,116,1)
- print("˜ you loose ˜",36,106,8)
+ draw_text("˜ you loose ˜",36,1,8)
 end
 
 function draw_gps()
@@ -879,14 +892,14 @@ eeeee554455eeeee1d666dd1aaaaaaa711111111cc1c1111e55c5c5ce551dd15edeeeeeee57555ee
 eeeeeee24eeeeeee1dd66d11aa7aaaaa11111c1111111111eec5c5c5e5511551ee5e5ee5e57555eee777777ea767777eae6eeeeee6eeee6eeeee5eee51118899
 eeeeeee24eeeeeeee111111eafaaaaaa1111c1cc11111111eeec5c5eee15d15eeeede5eee55575eeee7777eeae9799aeae9e99ae5eee6e5eeee55eeeeeeee8fe
 eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eeeeeeeeeeeeae96aaeeae96aaeeeeaeeeeeeeeeeeeeeeeeeee
-55555555555555550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50000005500000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50d2d205509a9a050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-502d2d0550a9a9050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50d2d205509a9a050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-502d2d0550a9a9050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50000005500000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-55555555555555550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5555555555555555eeeeaeeeeeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5000000550000005eeeaaaeeeeeeaeee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+50d2d205509a9a05eeaa9aaeeeeaaaee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+502d2d0550a9a905eea999aeeeea9aee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+50d2d205509a9a05eea999aeeeee5eee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+502d2d0550a9a905eeeaaaeeeeee6eee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5000000550000005e5ee5ee5eeee6eee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5555555555555555ee55555eeeee6eee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
