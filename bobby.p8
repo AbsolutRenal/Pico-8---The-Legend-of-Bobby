@@ -95,10 +95,10 @@ walking = 2
 running = 3
 max_diving_delay = 60
 screen_offset = 8
-map_x_tiles = 96
-map_y_tiles = 48
-map_max_x = map_x_tiles * 8 -- nb columns * column width
-map_max_y = map_y_tiles * 8
+map_x_tiles = 112
+map_y_tiles = 64
+map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
+map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
 treasures = {{x=1,y=20,sprite=spr_key},{x=19,y=18,sprite=spr_boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=spr_bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=spr_flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=spr_heart_increment},{x=10,y=60,sprite=heart_full},{x=108,y=53,sprite=spr_heart_increment},{x=109,y=53,sprite=spr_heart_increment},{x=28,y=12,sprite=heart_full},{x=11,y=10,sprite=spr_gps,descript={x=13,text="you now have access to map"}}}
@@ -136,8 +136,8 @@ function init_game()
 end
 
 function create_gps_map()
- for j=0,63 do
-  for i=0,127 do
+ for j=0,(map_y_tiles-1) do
+  for i=0,(map_x_tiles-1) do
    add(map_data, 0)
   end
  end
@@ -172,15 +172,20 @@ function reinit_map_items()
 end
 
 function update_gps_data()
- min_x = flr(map_x/-8)
- min_y = flr(map_y/-8)
- for j=min_y,min_y +15 do
-  for i=min_x,min_x +15 do
-   map_data[i+j*128 +1] = color_for_sprite(mget(i, j))
+ if should_record_gps() then
+  min_x = flr(map_x/-8)
+  min_y = flr(map_y/-8)
+  for j=min_y,min_y +15 do
+   for i=min_x,min_x +15 do
+    map_data[i+j*map_x_tiles +1] = color_for_sprite(mget(i, j))
+   end
   end
  end
 end
 
+function should_record_gps()
+ return map_x > -map_x_tiles * 8
+end
 function color_for_sprite(sprite)
  local col = background_color
  if sprite == spr_water or sprite == spr_water2 then
@@ -663,13 +668,13 @@ end
 function draw_gps()
  rectfill(0, 0, 127, 127, 1)
  local i = 0
- --local m_offset_x = (128 - map_x_tiles)*0.5
+ local m_offset_x = (128 - map_x_tiles)*0.5
  local m_offset_y = (128 - map_y_tiles)*0.5
  for col in all(map_data) do
-  pset(i%128, m_offset_y + flr(i/128), col)
+  pset(m_offset_x + i%map_x_tiles, m_offset_y + flr(i/map_x_tiles), col)
   i	+= 1
  end
- circ(flr((bobby.x - map_x)/8), flr((bobby.y - map_y)/8) + 32, 2, 8)
+ circ(m_offset_x + flr((bobby.x - map_x)/8), flr((bobby.y - map_y)/8) + m_offset_y, 2, 8)
 end
 
 function draw_game()
