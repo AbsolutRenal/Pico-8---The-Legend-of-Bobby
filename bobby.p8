@@ -497,7 +497,7 @@ end
 function collide_with(cells,flag)
  local is_colliding = false
  for cell in all(cells) do
-  is_colliding = is_colliding or fget(cell.sprite,flag)
+  is_colliding = is_colliding or is_terrain_type(cell.sprite,flag)
  end
  return is_colliding
 end
@@ -509,7 +509,7 @@ function open_treasure_if_needed()
    if collide_with({cell},flag_treasure) and collide_with({cell},flag_need_key) then
     if keys > 0 then
      sfx(2)
-     if fget(mget(cell.x-1,cell.y), flag_treasure) then
+     if is_terrain_type(mget(cell.x-1,cell.y), flag_treasure) then
       spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
     	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
       spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
@@ -740,9 +740,9 @@ function animate_textures()
   for j=m,m+16 do
    c = mget(i,j)
    if (tick%21) == 0 then
-    if fget(c,flag_water) then
+    if is_terrain_type(c,flag_water) then
      mset(i,j,spr_water + tick%2)
-    elseif fget(c,flag_deep_water) then
+    elseif is_terrain_type(c,flag_deep_water) then
      mset(i,j,spr_deep_water + tick%2)
     end
    elseif (tick%29) == 0 then
@@ -783,7 +783,7 @@ end
 function draw_background_if_behind()
  local cells = current_overlaped_cells()
  for c in all(cells) do
-  if fget(c.cell,flag_behind) then
+  if is_terrain_type(c.cell,flag_behind) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
@@ -818,7 +818,7 @@ function handle_bomb_damage()
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
-  if fget(cell.sprite, flag_destroyable) then
+  if is_terrain_type(cell.sprite, flag_destroyable) then
    mset(cell.x, cell.y, cell.sprite +1)
   end
  end
@@ -860,8 +860,6 @@ function draw_display(open,completion)
 	draw_background_if_behind()
 	draw_hud()
  
- --local colors = {0,5,6,7}
- --local colors = {7,6,5,0}
  local colors = {10,12,8,1}
  local c = count(colors)
  local l = tick%32
