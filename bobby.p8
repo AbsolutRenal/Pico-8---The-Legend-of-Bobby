@@ -480,7 +480,7 @@ function is_on_terrain_type(t)
 end
 
 function is_teleport(sprite)
- return is_terrain_type(flag_teleport) and not is_terrain_type(flag_door)
+ return is_terrain_type(sprite, flag_teleport) and not is_terrain_type(sprite, flag_door)
 end
 
 function is_on_teleport()
