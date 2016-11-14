@@ -60,6 +60,9 @@ spr_treasure = 14
 spr_treasure7 = 28
 spr_teleport1 = 64
 spr_teleport2 = 65
+spr_mud = 68
+spr_wall = 69
+spr_door = 70
 heart_full = 39
 heart_empty = 42
 spr_big_treasure_opened1 = 14
@@ -203,6 +206,12 @@ function color_for_sprite(sprite)
  elseif sprite == spr_treasure1 or sprite == spr_treasure2 or sprite == spr_treasure3 or sprite == spr_treasure4 or sprite == spr_treasure5 or sprite == spr_treasure6 or sprite == spr_treasure7 then
   col = 9
  elseif sprite == spr_teleport1 or sprite == spr_teleport2 then
+  col = 2
+ elseif sprite == spr_mud then
+  col = 4
+ elseif sprite == spr_wall then
+  col = 5
+ elseif sprite == spr_door then
   col = 2
  end
  return col
