@@ -81,7 +81,8 @@ bomb_damage = 3
 spr_key = 62
 spr_candle = 66
 
--- flags 
+-- flags
+--- trait type
 flag_solid = {0}
 flag_water = {1}
 flag_deep_water = {2}
@@ -91,6 +92,10 @@ flag_destroyable = {5}
 flag_need_key = {6}
 flag_teleport = {7}
 flag_door = {4,7}
+--- kind of
+kind_door = {4,7}
+kind_teleport = {7}
+
 
 -- game config
 alpha_color = 14
@@ -472,6 +477,34 @@ function get_bobby_mid()
  local mid_x = flr((bobby.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5) - map_x)/8)
  local mid_y = flr((bobby.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5) - map_y)/8)
  return {x=mid_x,y=mid_y}
+end
+
+function is_kind_of(sprite, flags)
+ local bit = 0
+ for flag in all(flags) do
+  bit += sqrt(flag)
+ end
+ return fget(sprite) == bit
+end
+
+function has_trait_type(sprite, flags)
+ local b = true
+ for flag in all(flags) do
+  b = b and fget(sprite,flag)
+ end
+ return b
+end
+
+function has_trait_type(sprite, flag)
+ return fget(sprite, flag)
+end
+
+function is_kind_of(sprite, flags)
+ local b = true
+ for flag in all(flags) do
+  b = b and fget(sprite, flag)
+ end
+ return b
 end
 
 function is_terrain_type(sprite, flags)
