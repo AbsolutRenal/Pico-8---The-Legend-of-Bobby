@@ -83,15 +83,16 @@ spr_candle = 66
 
 -- flags
 --- trait type
-flag_solid = {0}
-flag_water = {1}
-flag_deep_water = {2}
-flag_behind = {3}
-flag_treasure = {4}
-flag_destroyable = {5}
-flag_need_key = {6}
-flag_teleport = {7}
-flag_door = {4,7}
+flag = {
+ solid = 0,
+ water = 1,
+ deep_water = 2,
+ behind = 3,
+ treasure = 4,
+ destroyable = 5,
+ need_key = 6,
+ teleport = 7
+}
 --- kind of
 kind_door = {4,7}
 kind_teleport = {7}
@@ -339,7 +340,7 @@ function handle_gps_update()
 end
 
 function select_item()
- if not is_on_terrain_type(flag_deep_water) and not btn_1_down then
+ if not is_on_terrain_type(flag.deep_water) and not btn_1_down then
   btn_1_down = true
   local nb = count(items)
   if nb > 1 then
@@ -366,7 +367,7 @@ end
 function use_item()
  if item_available(spr_boots) then
   move_speed = running
- elseif item_available(spr_flipper) and is_on_terrain_type(flag_deep_water) and not btn_2_down then
+ elseif item_available(spr_flipper) and is_on_terrain_type(flag.deep_water) and not btn_2_down then
   bobby.dive = max_diving_delay
  elseif item_available(spr_bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
@@ -403,7 +404,7 @@ end
 function config_bobby(sx,sy)
  local orientation
  local water = (sx==0 and sy==0) and spr_water_standing or spr_water_walk
- if is_on_terrain_type(flag_deep_water) then
+ if is_on_terrain_type(flag.deep_water) then
   move_speed = 1
   if bobby.dive > 0 then
    orientation = spr_dive
@@ -495,18 +496,6 @@ function has_trait_type(sprite, flags)
  return b
 end
 
-function has_trait_type(sprite, flag)
- return fget(sprite, flag)
-end
-
-function is_kind_of(sprite, flags)
- local b = true
- for flag in all(flags) do
-  b = b and fget(sprite, flag)
- end
- return b
-end
-
 function is_terrain_type(sprite, flags)
  local b = true
  for flag in all(flags) do
@@ -522,7 +511,7 @@ function is_on_terrain_type(t)
 end
 
 function is_teleport(sprite)
- return is_terrain_type(sprite, flag_teleport) and not is_terrain_type(sprite, flag_door)
+ return is_terrain_type(sprite, flag.teleport) and not is_terrain_type(sprite, flag.door)
 end
 
 function is_on_teleport()
@@ -533,7 +522,7 @@ end
 
 function should_move()
 	local cells = collision_cells()
-	return not collide_with(cells,flag_solid) and (not collide_with(cells,flag_deep_water) or item_available(spr_flipper))
+	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(spr_flipper))
 end
 
 function collide_with(cells,flag)
@@ -548,10 +537,10 @@ function open_treasure_if_needed()
  if bobby.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
-   if collide_with({cell},flag_treasure) and collide_with({cell},flag_need_key) then
+   if collide_with({cell},flag.treasure) and collide_with({cell},flag.need_key) then
     if keys > 0 then
      sfx(2)
-     if is_terrain_type(mget(cell.x-1,cell.y), flag_treasure) then
+     if is_terrain_type(mget(cell.x-1,cell.y), flag.treasure) then
       spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
     	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
       spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
@@ -584,7 +573,7 @@ function open_treasure_if_needed()
      coresume(delay_co,15)
      return
     end
-   elseif collide_with({cell},flag_treasure) and not collide_with({cell},flag_need_key) then
+   elseif collide_with({cell},flag.treasure) and not collide_with({cell},flag.need_key) then
     sfx(2)
     mset(cell.x, cell.y, cell.sprite +1)
     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
@@ -769,7 +758,7 @@ function draw_bobby()
  if bobby.injured % 2 == 0 then
  	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
  end
-	if is_on_terrain_type(flag_water) then
+	if is_on_terrain_type(flag.water) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
 end
@@ -782,9 +771,9 @@ function animate_textures()
   for j=m,m+16 do
    c = mget(i,j)
    if (tick%21) == 0 then
-    if is_terrain_type(c,flag_water) then
+    if is_terrain_type(c,flag.water) then
      mset(i,j,spr_water + tick%2)
-    elseif is_terrain_type(c,flag_deep_water) then
+    elseif is_terrain_type(c,flag.deep_water) then
      mset(i,j,spr_deep_water + tick%2)
     end
    elseif (tick%29) == 0 then
@@ -825,7 +814,7 @@ end
 function draw_background_if_behind()
  local cells = current_overlaped_cells()
  for c in all(cells) do
-  if is_terrain_type(c.cell,flag_behind) then
+  if is_terrain_type(c.cell,flag.behind) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
@@ -860,7 +849,7 @@ function handle_bomb_damage()
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
-  if is_terrain_type(cell.sprite, flag_destroyable) then
+  if is_terrain_type(cell.sprite, flag.destroyable) then
    mset(cell.x, cell.y, cell.sprite +1)
   end
  end
