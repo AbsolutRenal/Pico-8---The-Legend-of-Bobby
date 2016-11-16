@@ -5,12 +5,14 @@ __lua__
 --  by absolut.renal (2016)
 
 -- controls
-up = 2
-down = 3
-left = 0
-right = 1
-btn_1 = 5
-btn_2 = 4
+controls = {
+ up = 2,
+ down = 3,
+ left = 0,
+ right = 1,
+ btn_1 = 5,
+ btn_2 = 4
+}
 
 -- game states
 game_state = {
@@ -21,75 +23,92 @@ game_state = {
 	state_dead = 4,
 	state_loose = 5
 }
--- sprites
-spr_front = 0
-spr_back = 2
-spr_side = 4
-spr_dive = 6
-spr_standing = 16
-spr_open_treasure = 17
-spr_swim_front = 18
-spr_swim_back = 20
-spr_swim_side = 22
-spr_water_walk = 12
-spr_water_standing = 44
-spr_dead = 63
-spr_water = 36
-spr_deep_water = 52
-spr_water2 = 37
-spr_deep_water2 = 53
-spr_sand = 51
-spr_small_tree = 34
-spr_rock1 = 50
-spr_rock2 = 55
-spr_rock2_broken = 56
-spr_rock3 = 47
-spr_rock4 = 8
-spr_rock4_broken = 9
-spr_tree1 = 32
-spr_tree2 = 33
-spr_tree3 = 48
-spr_tree4 = 49
-spr_treasure1 = 10
-spr_treasure2 = 11
-spr_treasure3 = 24
-spr_treasure4 = 25
-spr_treasure5 = 26
-spr_treasure6 = 27
-spr_treasure = 14
-spr_treasure7 = 28
-spr_teleport1 = 64
-spr_teleport2 = 65
-heart_full = 39
-heart_empty = 42
-spr_big_treasure_opened1 = 14
-spr_big_treasure_opened2 = 15
-spr_big_treasure_opened3 = 30
-spr_big_treasure_opened4 = 31
-spr_treasure_opened = 25
-spr_treasure_sand_opened = 29
-spr_selected_item = 43
-spr_boots = 38
-spr_flipper = 54
-spr_heart_increment = 45
-spr_gps = 46
-spr_bomb = 57
-bomb_damage = 3
-spr_key = 62
-spr_candle = 66
 
--- flags 
-flag_solid = 0
-flag_water = 1
-flag_deep_water = 2
-flag_behind = 3
-flag_treasure = 4
-flag_destroyable = 5
-flag_need_key = 6
-flag_teleport = 7
+-- sprites
+sprites = {
+ front = 0,
+ back = 2,
+ side = 4,
+ dive = 6,
+ standing = 16,
+ open_treasure = 17,
+ swim_front = 18,
+ swim_back = 20,
+ swim_side = 22,
+ water_walk = 12,
+ water_standing = 44,
+ dead = 63,
+ water = 36,
+ deep_water = 52,
+ water2 = 37,
+ deep_water2 = 53,
+ sand = 51,
+ small_tree = 34,
+ rock1 = 50,
+ rock2 = 55,
+ rock2_broken = 56,
+ rock3 = 47,
+ rock4 = 8,
+ rock4_broken = 9,
+ tree1 = 32,
+ tree2 = 33,
+ tree3 = 48,
+ tree4 = 49,
+ treasure1 = 10,
+ treasure2 = 11,
+ treasure3 = 24,
+ treasure4 = 25,
+ treasure5 = 26,
+ treasure6 = 27,
+ treasure = 14,
+ treasure7 = 28,
+ teleport1 = 64,
+ teleport2 = 65,
+ mud = 68,
+ wall = 69,
+ door = 70,
+ heart_full = 39,
+ heart_empty = 42,
+ big_treasure_opened1 = 14,
+ big_treasure_opened2 = 15,
+ big_treasure_opened3 = 30,
+ big_treasure_opened4 = 31,
+ treasure_opened = 25,
+ treasure_sand_opened = 29,
+ selected_item = 43,
+ boots = 38,
+ flipper = 54,
+ heart_increment = 45,
+ gps = 46,
+ bomb = 57,
+ key = 62,
+ candle = 66
+}
+
+-- flags
+--- trait type
+flag = {
+ solid = 0,
+ water = 1,
+ deep_water = 2,
+ behind = 3,
+ treasure = 4,
+ destroyable = 5,
+ need_key = 6,
+ teleport = 7
+}
+--- kind of
+kind = {
+ door = {4,7},
+ teleport = {7},
+ treasure = {0,4},
+ closed_treasure = {0,4,6}
+}
+
 
 -- game config
 alpha_color = 14
+bomb_damage = 3
 refresh_rate = 2
 walking = 2
 running = 3
@@ -101,7 +120,8 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-treasures = {{x=1,y=20,sprite=spr_key},{x=19,y=18,sprite=spr_boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=spr_bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=spr_flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=spr_heart_increment},{x=10,y=60,sprite=heart_full},{x=108,y=53,sprite=spr_heart_increment},{x=109,y=53,sprite=spr_heart_increment},{x=28,y=12,sprite=heart_full},{x=11,y=10,sprite=spr_gps,descript={x=13,text="you now have access to map"}}}
+treasures = {{x=1,y=20,sprite=sprites.key},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
+doors = {{inn={x=21,y=10},out={x=120,y=0},offset={x=0,y=1}}}
 
 -- func
 function _init()
@@ -116,7 +136,7 @@ function init_game()
 	map_x = 0
 	map_y = 0
 	tick = 0
-	current_spr = spr_standing
+	current_spr = sprites.standing
 	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
 	background_color = 3
 	move_count = 0
@@ -149,7 +169,7 @@ function detect_teleports()
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
-   if fget(s,flag_teleport) then
+   if is_kind_of(s, kind.teleport) then
     add(teleports,{x=i,y=j})
    end
   end
@@ -158,7 +178,7 @@ end
 
 function reinit_map_items()
  local s
- local items = {{from=spr_big_treasure_opened1,to=spr_treasure1},{from=spr_big_treasure_opened2,to=spr_treasure2},{from=spr_big_treasure_opened3,to=spr_treasure5},{from=spr_big_treasure_opened4,to=spr_treasure6},{from=spr_treasure_opened,to=spr_treasure3},{from=spr_treasure_sand_opened,to=spr_treasure7},{from=spr_rock2_broken,to=spr_rock2},{from=spr_rock4_broken,to=spr_rock4}}
+ local items = {{from=sprites.big_treasure_opened1,to=sprites.treasure1},{from=sprites.big_treasure_opened2,to=sprites.treasure2},{from=sprites.big_treasure_opened3,to=sprites.treasure5},{from=sprites.big_treasure_opened4,to=sprites.treasure6},{from=sprites.treasure_opened,to=sprites.treasure3},{from=sprites.treasure_sand_opened,to=sprites.treasure7},{from=sprites.rock2_broken,to=sprites.rock2},{from=sprites.rock4_broken,to=sprites.rock4}}
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
@@ -188,19 +208,25 @@ function should_record_gps()
 end
 function color_for_sprite(sprite)
  local col = background_color
- if sprite == spr_water or sprite == spr_water2 then
+ if sprite == sprites.water or sprite == sprites.water2 then
   col = 13
- elseif sprite == spr_deep_water or sprite == spr_deep_water2 then
+ elseif sprite == sprites.deep_water or sprite == sprites.deep_water2 then
   col = 1
- elseif sprite == spr_sand then
+ elseif sprite == sprites.sand then
   col = 10
- elseif sprite == spr_small_tree or sprite == spr_tree1 or sprite == spr_tree2 or sprite == spr_tree3 or sprite == spr_tree4 then
+ elseif sprite == sprites.small_tree or sprite == sprites.tree1 or sprite == sprites.tree2 or sprite == sprites.tree3 or sprite == sprites.tree4 then
   col = 11
- elseif sprite == spr_rock1 or sprite == spr_rock2 or sprite == spr_rock3 or sprite == spr_rock4 then
+ elseif sprite == sprites.rock1 or sprite == sprites.rock2 or sprite == sprites.rock3 or sprite == sprites.rock4 then
   col = 5
- elseif sprite == spr_treasure1 or sprite == spr_treasure2 or sprite == spr_treasure3 or sprite == spr_treasure4 or sprite == spr_treasure5 or sprite == spr_treasure6 or sprite == spr_treasure7 then
+ elseif sprite == sprites.treasure1 or sprite == sprites.treasure2 or sprite == sprites.treasure3 or sprite == sprites.treasure4 or sprite == sprites.treasure5 or sprite == sprites.treasure6 or sprite == sprites.treasure7 then
   col = 9
- elseif sprite == spr_teleport1 or sprite == spr_teleport2 then
+ elseif sprite == sprites.teleport1 or sprite == sprites.teleport2 then
+  col = 2
+ elseif sprite == sprites.mud then
+  col = 4
+ elseif sprite == sprites.wall then
+  col = 5
+ elseif sprite == sprites.door then
   col = 2
  end
  return col
@@ -230,7 +256,7 @@ end
 
 function handle_game_update()
 	if tick%refresh_rate == 0 then
-	 if is_on_terrain_type(flag_teleport) then
+	 if is_on_terrain_type(kind.teleport) then
 	  local bobby_mid = get_bobby_mid()
 	  for i=1,count(teleports) do
 	   if bobby_mid.x == teleports[i].x and bobby_mid.y == teleports[i].y then
@@ -246,12 +272,12 @@ function handle_game_update()
 	 end
 	
 		move_speed = walking
-		if btn(btn_2) then
+		if btn(controls.btn_2) then
 			use_item()
 		else
 		 stop_item()
 		end
-		if btn(btn_1) then
+		if btn(controls.btn_1) then
 		 select_item()
 		else
 		 btn_1_down = false
@@ -297,7 +323,7 @@ end
 function teleport_bobby_to(p)
  bobby.x = 64
  bobby.y = 64
- current_spr = spr_standing
+ current_spr = sprites.standing
  map_x = 64 - (p.x+1) * 8
  map_y = 64 - p.y * 8
  if map_x > 0 then
@@ -317,13 +343,13 @@ function teleport_bobby_to(p)
 end
 
 function handle_gps_update()
- if not btn(btn_2) then
+ if not btn(controls.btn_2) then
   state = game_state.state_game
  end
 end
 
 function select_item()
- if not is_on_terrain_type(flag_deep_water) and not btn_1_down then
+ if not is_on_terrain_type(flag.deep_water) and not btn_1_down then
   btn_1_down = true
   local nb = count(items)
   if nb > 1 then
@@ -337,7 +363,7 @@ function select_item()
 end
 
 function one_shot_item(item)
- return item == spr_key or item == heart_full or item == spr_heart_increment
+ return item == sprites.key or item == sprites.heart_full or item == sprites.heart_increment
 end
 
 function item_available(item)
@@ -348,13 +374,13 @@ function item_available(item)
 end
 
 function use_item()
- if item_available(spr_boots) then
+ if item_available(sprites.boots) then
   move_speed = running
- elseif item_available(spr_flipper) and is_on_terrain_type(flag_deep_water) and not btn_2_down then
+ elseif item_available(sprites.flipper) and is_on_terrain_type(flag.deep_water) and not btn_2_down then
   bobby.dive = max_diving_delay
- elseif item_available(spr_bomb) and current_bomb == nil then
+ elseif item_available(sprites.bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
- elseif item_available(spr_gps) then
+ elseif item_available(sprites.gps) then
   state = game_state.state_gps
  end
  btn_2_down = true
@@ -366,13 +392,13 @@ function stop_item()
 end
 
 function move_bobby()
-	if btn(down) then
+	if btn(controls.down) then
 		config_bobby(0,1)
-	elseif btn(up) then
+	elseif btn(controls.up) then
 		config_bobby(0,-1)
-	elseif btn(left) then
+	elseif btn(controls.left) then
 		config_bobby(-1,0)
-	elseif btn(right) then
+	elseif btn(controls.right) then
 		config_bobby(1,0)
 	else
 		stop_walking()
@@ -386,11 +412,11 @@ end
 
 function config_bobby(sx,sy)
  local orientation
- local water = (sx==0 and sy==0) and spr_water_standing or spr_water_walk
- if is_on_terrain_type(flag_deep_water) then
+ local water = (sx==0 and sy==0) and sprites.water_standing or sprites.water_walk
+ if is_on_terrain_type(flag.deep_water) then
   move_speed = 1
   if bobby.dive > 0 then
-   orientation = spr_dive
+   orientation = sprites.dive
   else
    orientation = swimming_sprite(sx,sy)
   end
@@ -430,13 +456,13 @@ end
 function walking_sprite(sx,sy)
  local sprite
  if not (sx == 0) then
-  sprite = spr_side
+  sprite = sprites.side
  elseif sy > 0 then
-  sprite = spr_front
+  sprite = sprites.front
  elseif sy < 0 then
-  sprite = spr_back
+  sprite = sprites.back
  else
-  sprite = spr_standing
+  sprite = sprites.standing
  end
  return sprite
 end
@@ -444,11 +470,11 @@ end
 function swimming_sprite(sx,sy)
  local sprite
  if not (sx == 0) then
-  sprite = spr_swim_side
+  sprite = sprites.swim_side
  elseif sy < 0 then
-  sprite = spr_swim_back
+  sprite = sprites.swim_back
  else
-  sprite = spr_swim_front
+  sprite = sprites.swim_front
  end
  return sprite
 end
@@ -463,21 +489,51 @@ function get_bobby_mid()
  return {x=mid_x,y=mid_y}
 end
 
+function is_kind_of(sprite, flags)
+ local bit = 0
+ for flag in all(flags) do
+  bit += shl(1, flag)
+ end
+ return fget(sprite) == bit
+end
+
+function has_trait_type(sprite, flags)
+ return fget(sprite, flags)
+end
+
+--[[
+function is_terrain_type(sprite, flags)
+ local b = true
+ for flag in all(flags) do
+  b = b and fget(sprite,flag)
+ end
+ return b
+end
+]]
+
 function is_on_terrain_type(t)
  local bobby_mid = get_bobby_mid()
  local cell = mget(bobby_mid.x,bobby_mid.y)
- return fget(cell,t)
+ if type(t) == "number" then
+  return has_trait_type(cell, t)
+ elseif type(t) == "table" then
+  return is_kind_of(cell, t)
+ end
 end
 
 function should_move()
 	local cells = collision_cells()
-	return not collide_with(cells,flag_solid) and (not collide_with(cells,flag_deep_water) or item_available(spr_flipper))
+	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(sprites.flipper))
 end
 
-function collide_with(cells,flag)
+function collide_with(cells,flags)
  local is_colliding = false
  for cell in all(cells) do
-  is_colliding = is_colliding or fget(cell.sprite,flag)
+  if type(flags) == "number" then
+   is_colliding = is_colliding or has_trait_type(cell.sprite,flags)
+  elseif type(flags) == "table" then
+   is_colliding = is_colliding or is_kind_of(cell.sprite,flags)
+  end
  end
  return is_colliding
 end
@@ -486,49 +542,49 @@ function open_treasure_if_needed()
  if bobby.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
-   if collide_with({cell},flag_treasure) and collide_with({cell},flag_need_key) then
+   if collide_with({cell},kind.closed_treasure) then
     if keys > 0 then
      sfx(2)
-     if fget(mget(cell.x-1,cell.y), flag_treasure) then
-      spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
-      spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x,cell.y-1,spr_big_treasure_opened2)
-      spr(spr_big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x-1,cell.y,spr_big_treasure_opened3)
-      spr(spr_big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x,cell.y,spr_big_treasure_opened4)
+     if is_kind_of(mget(cell.x-1,cell.y), kind.closed_treasure) then
+      spr(sprites.big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x-1,cell.y-1,sprites.big_treasure_opened1)
+      spr(sprites.big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,sprites.big_treasure_opened2)
+      spr(sprites.big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x-1,cell.y,sprites.big_treasure_opened3)
+      spr(sprites.big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,sprites.big_treasure_opened4)
      else
-      spr(spr_big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x,cell.y-1,spr_big_treasure_opened1)
-      spr(spr_big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x+1,cell.y-1,spr_big_treasure_opened2)
-      spr(spr_big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x,cell.y,spr_big_treasure_opened3)
-      spr(spr_big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x+1,cell.y,spr_big_treasure_opened4)
+      spr(sprites.big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,sprites.big_treasure_opened1)
+      spr(sprites.big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x+1,cell.y-1,sprites.big_treasure_opened2)
+      spr(sprites.big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,sprites.big_treasure_opened3)
+      spr(sprites.big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x+1,cell.y,sprites.big_treasure_opened4)
      end
      keys -= 1
      move_count = 0
-     current_spr = set_current_spr(spr_open_treasure)
-     water_spr = spr_water_standing
+     current_spr = set_current_spr(sprites.open_treasure)
+     water_spr = sprites.water_standing
      activate_treasure(cell)
      return
     else
      draw_text("hum... i need a key !",25,0,7)
-     current_spr = spr_standing
+     current_spr = sprites.standing
      draw_bobby()
      delay_co = cocreate(delay)
      coresume(delay_co,15)
      return
     end
-   elseif collide_with({cell},flag_treasure) and not collide_with({cell},flag_need_key) then
+   elseif collide_with({cell},kind.treasure) then
     sfx(2)
     mset(cell.x, cell.y, cell.sprite +1)
     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
    	move_count = 0
-    current_spr = set_current_spr(spr_open_treasure)
-    water_spr = spr_water_standing
+    current_spr = set_current_spr(sprites.open_treasure)
+    water_spr = sprites.water_standing
     activate_treasure(cell)
     return
    end
@@ -541,11 +597,11 @@ function activate_treasure(cell)
   if t.x == cell.x and t.y == cell.y then
    if not one_shot_item(t.sprite) then
     add(items,t)
-   elseif t.sprite == heart_full then
+   elseif t.sprite == sprites.heart_full then
     life = min(life + heart_value,hearts * heart_value)
-   elseif t.sprite == spr_heart_increment then
+   elseif t.sprite == sprites.heart_increment then
     hearts += 1
-   elseif t.sprite == spr_key then
+   elseif t.sprite == sprites.key then
     keys += 1
    end
    spr(t.sprite,bobby.x, bobby.y - 10)
@@ -707,7 +763,7 @@ function draw_bobby()
  if bobby.injured % 2 == 0 then
  	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
  end
-	if is_on_terrain_type(flag_water) then
+	if is_on_terrain_type(flag.water) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
 end
@@ -720,14 +776,14 @@ function animate_textures()
   for j=m,m+16 do
    c = mget(i,j)
    if (tick%21) == 0 then
-    if fget(c,flag_water) then
-     mset(i,j,spr_water + tick%2)
-    elseif fget(c,flag_deep_water) then
-     mset(i,j,spr_deep_water + tick%2)
+    if has_trait_type(c,flag.water) then
+     mset(i,j,sprites.water + tick%2)
+    elseif has_trait_type(c,flag.deep_water) then
+     mset(i,j,sprites.deep_water + tick%2)
     end
    elseif (tick%29) == 0 then
-    if fget(c,flag_teleport) then
-     mset(i,j,spr_teleport1+ tick%2)
+    if is_kind_of(c, kind.teleport) then
+     mset(i,j,sprites.teleport1+ tick%2)
     end
    end
   end
@@ -738,11 +794,11 @@ function draw_hud()
  local h
  for i=1,hearts do
   if ceil(life/heart_value) < i then
-   h = heart_empty
+   h = sprites.heart_empty
   elseif life < (i * heart_value) then
-   h = heart_full + (life - i * heart_value) % heart_value
+   h = sprites.heart_full + (life - i * heart_value) % heart_value
   else
-   h = heart_full
+   h = sprites.heart_full
   end
   spr(h,i*7,120,1,1)
  end
@@ -750,12 +806,12 @@ function draw_hud()
  for item in all(items) do
    spr(item.sprite,128 - n*8,0)
   if n == selected_item then
-   spr(spr_selected_item,128 - n*8,0)
+   spr(sprites.selected_item,128 - n*8,0)
   end
   n += 1
  end
  if keys > 0 then
-  spr(spr_key,0,0)
+  spr(sprites.key,0,0)
   print("x"..keys,8,2,7)
  end
 end
@@ -763,7 +819,7 @@ end
 function draw_background_if_behind()
  local cells = current_overlaped_cells()
  for c in all(cells) do
-  if fget(c.cell,flag_behind) then
+  if has_trait_type(c.cell,flag.behind) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
@@ -775,13 +831,13 @@ function handle_bombs()
   if current_bomb.count_down <= 0 then
    bomb_explode()
   else
-   spr(spr_bomb,current_bomb.x + map_x,current_bomb.y + map_y)
+   spr(sprites.bomb,current_bomb.x + map_x,current_bomb.y + map_y)
   end
  end
 end
 
 function bomb_explode()
- local sprite = spr_bomb + flr(abs(current_bomb.count_down)/refresh_rate)
+ local sprite = sprites.bomb + flr(abs(current_bomb.count_down)/refresh_rate)
  spr(sprite,current_bomb.x + map_x,current_bomb.y + map_y)
  if current_bomb.count_down == 0 then 
   handle_bomb_damage()
@@ -798,7 +854,7 @@ function handle_bomb_damage()
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
-  if fget(cell.sprite, flag_destroyable) then
+  if has_trait_type(cell.sprite, flag.destroyable) then
    mset(cell.x, cell.y, cell.sprite +1)
   end
  end
@@ -820,7 +876,7 @@ function injured(damage)
 end
 
 function kill_bobby()
- current_spr = spr_dead
+ current_spr = sprites.dead
  state = game_state.state_dead
  loose_co = cocreate(delay)
  coresume(loose_co,120,loose_game)
@@ -840,8 +896,6 @@ function draw_display(open,completion)
 	draw_background_if_behind()
 	draw_hud()
  
- --local colors = {0,5,6,7}
- --local colors = {7,6,5,0}
  local colors = {10,12,8,1}
  local c = count(colors)
  local l = tick%32
@@ -901,14 +955,14 @@ eeeee554455eeeee1d666dd1aaaaaaa711111111cc1c1111e55c5c5ce551dd15edeeeeeee57555ee
 eeeeeee24eeeeeee1dd66d11aa7aaaaa11111c1111111111eec5c5c5e5511551ee5e5ee5e57555eee777777ea767777eae6eeeeee6eeee6eeeee5eee51118899
 eeeeeee24eeeeeeee111111eafaaaaaa1111c1cc11111111eeec5c5eee15d15eeeede5eee55575eeee7777eeae9799aeae9e99ae5eee6e5eeee55eeeeeeee8fe
 eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eeeeeeeeeeeeae96aaeeae96aaeeeeaeeeeeeeeeeeeeeeeeeee
-5555555555555555eeeeaeeeeeeeeeee444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5000000550000005eeeaaaeeeeeeaeee444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50d2d205509a9a05eeaa9aaeeeeaaaee444442440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5555555555555555eeeeaeeeeeeeeeee444444440dd00dd00dd00dd0000000000000000000000000000000000000000000000000000000000000000000000000
+5000000550000005eeeaaaeeeeeeaeee44444444055d055d0550005d000000000000000000000000000000000000000000000000000000000000000000000000
+50d2d205509a9a05eeaa9aaeeeeaaaee44444244055d055d0500000d000000000000000000000000000000000000000000000000000000000000000000000000
 502d2d0550a9a905eea999aeeeea9aee444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-50d2d205509a9a05eea999aeeeee5eee444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-502d2d0550a9a905eeeaaaeeeeee6eee424444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5000000550000005e5ee5ee5eeee6eee444444240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-5555555555555555ee55555eeeee6eee444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+50d2d205509a9a05eea999aeeeee5eee444444440dd00dd000000000000000000000000000000000000000000000000000000000000000000000000000000000
+502d2d0550a9a905eeeaaaeeeeee6eee42444444055d055d0d00000d000000000000000000000000000000000000000000000000000000000000000000000000
+5000000550000005e5ee5ee5eeee6eee44444424055d055d0d00200d000000000000000000000000000000000000000000000000000000000000000000000000
+5555555555555555ee55555eeeee6eee444444440000000000022200000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -998,25 +1052,25 @@ eeeeee2222eeeeeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eee
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 __gff__
-0000000000000000210008080000080800000000000000001101515111010101080801000202000000000000000000010101010004040021000000000000000080800000001000000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
+0000000000000000210008080000080800000000000000001101515111010101080801000202000000000000000000010101010004040021000000000000000080800000000190000000000000000000000000000808000000000000000000000000000001011000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-3434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434340000000000000000000000000034343434000000000000000000000000000000000000000000000000000000202100000000000000000000000034343434
-3434343434343424242424242434343434343434343434343434343434343434343434342424242434343434343434343434343434342424242424242424242424240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000303100000000000000000000000034343434
-3434343434242424242424242424242424343434343434343434343434343434343434242424242424242424243434343434342424242433333333333333332424242424240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434343424242424242424242424242424242424242424242424343434343434343434342424242424242424242424242424242424242433333300003333333333333333240000000000000000000000000000000000000000000000000000000000000000000000000000000000202100000000000000000000000000003434
-3434343424242424243333333333333324242424242424242424242424243434343434343424242424242424242424242424242424243333000000000000000033333333333300000000000000000000000000000000000000000000000000000000000000000000000000000000303100000000000000000000000000003434
-3434342424243333333333333333333333333333333333242424242424242424343434343424242424242424242424242424242433333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434342424243333333333333300202100000037000033333324242424242424242434343434342424242424242424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000202100000000000000000000000000003434
-3434342424333333333333332021303122180000000000003333333324242424242424242434343434242424242424243333333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000303100000000000000000000000000003434
-3434242433333333333300323031232323230000000000000000003333333333242424242424243434342424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434242433333333332021370000002323232323000000000000000000333333333324242424242424242424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003534
-3424242433333333333031180000232300232323320000000000000020210033333333333324242424242424242433333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3424242433333333000000000000000000232300000000000000000030312021003333333333242433333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434242424333333000000232300000000002323232300000000202118003031202100333333333333333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434242424333333000040232323000000000000000022000000303100000000303100003333333333333333333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434343424243333330020210000000000000000000000000000000000000000000000000000333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
-3434343424242433330030310000000000000000000000000000000000000000000000000000003333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
+3434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434340000000000000000000000000034343434000000000000000000000000000000000000000000000000000000202145454545454545454645454545454545
+3434343434343424242424242434343434343434343434343434343434343434343434342424242434343434343434343434343434342424242424242424242424240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000303145454545454545444444444444454545
+3434343434242424242424242424242424343434343434343434343434343434343434242424242424242424243434343434342424242433333333333333332424242424240000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444444444444444444545
+3434343424242424242424242424242424242424242424242424343434343434343434342424242424242424242424242424242424242433333300003333333333333333240000000000000000000000000000000000000000000000000000000000000000000000000000000000202145454444444444444444444444444545
+3434343424242424243333333333333324242424242424242424242424243434343434343424242424242424242424242424242424243333000000000000000033333333333300000000000000000000000000000000000000000000000000000000000000000000000000000000303145454444444444444444444444444545
+3434342424243333333333333333333333333333333333242424242424242424343434343424242424242424242424242424242433333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444444444444444444545
+3434342424243333333333333300202100000037000033333324242424242424242434343434342424242424242424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000202145454444444444444444444444444545
+3434342424333333333333332021303122180000000000003333333324242424242424242434343434242424242424243333333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000303145444444444444444444444444444445
+3434242433333333333300323031232323230000000000000000003333333333242424242424243434342424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444444444444444444445
+3434242433333333332021370000002323232323000000000000000000333333333324242424242424242424242424333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444444444444444444445
+3424242433333333333031180000232300232323324600000000000020210033333333333324242424242424242433333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444444444444444444445
+3424242433333333000000000000000000232300000000000000000030312021003333333333242433333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444444444444444444545
+3434242424333333000000232300000000002323232300000000202118003031202100333333333333333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444444444444444444545
+3434242424333333000040232323000000000000000022000000303100000000303100003333333333333333333300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444444444444444444545
+3434343424243333330020210000000000000000000000000000000000000000000000000000333333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454545454544444444444444454545
+3434343424242433330030310000000000000000000000000000000000000000000000000000003333333333330000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454545454545454545454545454545
 3434343434242433333300232323232300000020210000000000202100000000000000370000000000000020210000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
 3434343434242433333300000023230000000030312323000000303100000000370000000000000000000030310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
 3434343434242433333300232323232323003218000000230000000000000000000000000000002200000020210000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003434
