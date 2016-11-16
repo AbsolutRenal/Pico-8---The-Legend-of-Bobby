@@ -532,7 +532,7 @@ function collide_with(cells,flags)
   if type(flags) == "number" then
    is_colliding = is_colliding or has_trait_type(cell.sprite,flags)
   elseif type(flags) == "table" then
-   is_colliding = is_colliding and is_kind_of(cell.sprite,flags)
+   is_colliding = is_colliding or is_kind_of(cell.sprite,flags)
   end
  end
  return is_colliding
@@ -545,7 +545,7 @@ function open_treasure_if_needed()
    if collide_with({cell},kind.closed_treasure) then
     if keys > 0 then
      sfx(2)
-     if is_terrain_type(mget(cell.x-1,cell.y), kind.closed_treasure) then
+     if is_kind_of(mget(cell.x-1,cell.y), kind.closed_treasure) then
       spr(sprites.big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
     	 mset(cell.x-1,cell.y-1,sprites.big_treasure_opened1)
       spr(sprites.big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
