@@ -22,64 +22,65 @@ game_state = {
 	state_loose = 5
 }
 -- sprites
-spr_front = 0
-spr_back = 2
-spr_side = 4
-spr_dive = 6
-spr_standing = 16
-spr_open_treasure = 17
-spr_swim_front = 18
-spr_swim_back = 20
-spr_swim_side = 22
-spr_water_walk = 12
-spr_water_standing = 44
-spr_dead = 63
-spr_water = 36
-spr_deep_water = 52
-spr_water2 = 37
-spr_deep_water2 = 53
-spr_sand = 51
-spr_small_tree = 34
-spr_rock1 = 50
-spr_rock2 = 55
-spr_rock2_broken = 56
-spr_rock3 = 47
-spr_rock4 = 8
-spr_rock4_broken = 9
-spr_tree1 = 32
-spr_tree2 = 33
-spr_tree3 = 48
-spr_tree4 = 49
-spr_treasure1 = 10
-spr_treasure2 = 11
-spr_treasure3 = 24
-spr_treasure4 = 25
-spr_treasure5 = 26
-spr_treasure6 = 27
-spr_treasure = 14
-spr_treasure7 = 28
-spr_teleport1 = 64
-spr_teleport2 = 65
-spr_mud = 68
-spr_wall = 69
-spr_door = 70
-heart_full = 39
-heart_empty = 42
-spr_big_treasure_opened1 = 14
-spr_big_treasure_opened2 = 15
-spr_big_treasure_opened3 = 30
-spr_big_treasure_opened4 = 31
-spr_treasure_opened = 25
-spr_treasure_sand_opened = 29
-spr_selected_item = 43
-spr_boots = 38
-spr_flipper = 54
-spr_heart_increment = 45
-spr_gps = 46
-spr_bomb = 57
-bomb_damage = 3
-spr_key = 62
-spr_candle = 66
+sprites = {
+ front = 0,
+ back = 2,
+ side = 4,
+ dive = 6,
+ standing = 16,
+ open_treasure = 17,
+ swim_front = 18,
+ swim_back = 20,
+ swim_side = 22,
+ water_walk = 12,
+ water_standing = 44,
+ dead = 63,
+ water = 36,
+ deep_water = 52,
+ water2 = 37,
+ deep_water2 = 53,
+ sand = 51,
+ small_tree = 34,
+ rock1 = 50,
+ rock2 = 55,
+ rock2_broken = 56,
+ rock3 = 47,
+ rock4 = 8,
+ rock4_broken = 9,
+ tree1 = 32,
+ tree2 = 33,
+ tree3 = 48,
+ tree4 = 49,
+ treasure1 = 10,
+ treasure2 = 11,
+ treasure3 = 24,
+ treasure4 = 25,
+ treasure5 = 26,
+ treasure6 = 27,
+ treasure = 14,
+ treasure7 = 28,
+ teleport1 = 64,
+ teleport2 = 65,
+ mud = 68,
+ wall = 69,
+ door = 70,
+ heart_full = 39,
+ heart_empty = 42,
+ big_treasure_opened1 = 14,
+ big_treasure_opened2 = 15,
+ big_treasure_opened3 = 30,
+ big_treasure_opened4 = 31,
+ treasure_opened = 25,
+ treasure_sand_opened = 29,
+ selected_item = 43,
+ boots = 38,
+ flipper = 54,
+ heart_increment = 45,
+ gps = 46,
+ bomb = 57,
+ key = 62,
+ candle = 66
+}
 
 -- flags
 --- trait type
@@ -100,6 +101,7 @@ kind_teleport = {7}
 
 -- game config
 alpha_color = 14
+bomb_damage = 3
 refresh_rate = 2
 walking = 2
 running = 3
@@ -111,7 +113,7 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-treasures = {{x=1,y=20,sprite=spr_key},{x=19,y=18,sprite=spr_boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=spr_bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=spr_flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=spr_heart_increment},{x=10,y=60,sprite=heart_full},{x=108,y=53,sprite=spr_heart_increment},{x=109,y=53,sprite=spr_heart_increment},{x=28,y=12,sprite=heart_full},{x=11,y=10,sprite=spr_gps,descript={x=13,text="you now have access to map"}}}
+treasures = {{x=1,y=20,sprite=sprites.key},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=21,y=10},out={x=120,y=0},offset={x=0,y=1}}}
 
 -- func
@@ -127,7 +129,7 @@ function init_game()
 	map_x = 0
 	map_y = 0
 	tick = 0
-	current_spr = spr_standing
+	current_spr = sprites.standing
 	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
 	background_color = 3
 	move_count = 0
@@ -169,7 +171,7 @@ end
 
 function reinit_map_items()
  local s
- local items = {{from=spr_big_treasure_opened1,to=spr_treasure1},{from=spr_big_treasure_opened2,to=spr_treasure2},{from=spr_big_treasure_opened3,to=spr_treasure5},{from=spr_big_treasure_opened4,to=spr_treasure6},{from=spr_treasure_opened,to=spr_treasure3},{from=spr_treasure_sand_opened,to=spr_treasure7},{from=spr_rock2_broken,to=spr_rock2},{from=spr_rock4_broken,to=spr_rock4}}
+ local items = {{from=sprites.big_treasure_opened1,to=sprites.treasure1},{from=sprites.big_treasure_opened2,to=sprites.treasure2},{from=sprites.big_treasure_opened3,to=sprites.treasure5},{from=sprites.big_treasure_opened4,to=sprites.treasure6},{from=sprites.treasure_opened,to=sprites.treasure3},{from=sprites.treasure_sand_opened,to=sprites.treasure7},{from=sprites.rock2_broken,to=sprites.rock2},{from=sprites.rock4_broken,to=sprites.rock4}}
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
@@ -199,25 +201,25 @@ function should_record_gps()
 end
 function color_for_sprite(sprite)
  local col = background_color
- if sprite == spr_water or sprite == spr_water2 then
+ if sprite == sprites.water or sprite == sprites.water2 then
   col = 13
- elseif sprite == spr_deep_water or sprite == spr_deep_water2 then
+ elseif sprite == sprites.deep_water or sprite == sprites.deep_water2 then
   col = 1
- elseif sprite == spr_sand then
+ elseif sprite == sprites.sand then
   col = 10
- elseif sprite == spr_small_tree or sprite == spr_tree1 or sprite == spr_tree2 or sprite == spr_tree3 or sprite == spr_tree4 then
+ elseif sprite == sprites.small_tree or sprite == sprites.tree1 or sprite == sprites.tree2 or sprite == sprites.tree3 or sprite == sprites.tree4 then
   col = 11
- elseif sprite == spr_rock1 or sprite == spr_rock2 or sprite == spr_rock3 or sprite == spr_rock4 then
+ elseif sprite == sprites.rock1 or sprite == sprites.rock2 or sprite == sprites.rock3 or sprite == sprites.rock4 then
   col = 5
- elseif sprite == spr_treasure1 or sprite == spr_treasure2 or sprite == spr_treasure3 or sprite == spr_treasure4 or sprite == spr_treasure5 or sprite == spr_treasure6 or sprite == spr_treasure7 then
+ elseif sprite == sprites.treasure1 or sprite == sprites.treasure2 or sprite == sprites.treasure3 or sprite == sprites.treasure4 or sprite == sprites.treasure5 or sprite == sprites.treasure6 or sprite == sprites.treasure7 then
   col = 9
- elseif sprite == spr_teleport1 or sprite == spr_teleport2 then
+ elseif sprite == sprites.teleport1 or sprite == sprites.teleport2 then
   col = 2
- elseif sprite == spr_mud then
+ elseif sprite == sprites.mud then
   col = 4
- elseif sprite == spr_wall then
+ elseif sprite == sprites.wall then
   col = 5
- elseif sprite == spr_door then
+ elseif sprite == sprites.door then
   col = 2
  end
  return col
@@ -314,7 +316,7 @@ end
 function teleport_bobby_to(p)
  bobby.x = 64
  bobby.y = 64
- current_spr = spr_standing
+ current_spr = sprites.standing
  map_x = 64 - (p.x+1) * 8
  map_y = 64 - p.y * 8
  if map_x > 0 then
@@ -354,7 +356,7 @@ function select_item()
 end
 
 function one_shot_item(item)
- return item == spr_key or item == heart_full or item == spr_heart_increment
+ return item == sprites.key or item == sprites.heart_full or item == sprites.heart_increment
 end
 
 function item_available(item)
@@ -365,13 +367,13 @@ function item_available(item)
 end
 
 function use_item()
- if item_available(spr_boots) then
+ if item_available(sprites.boots) then
   move_speed = running
- elseif item_available(spr_flipper) and is_on_terrain_type(flag.deep_water) and not btn_2_down then
+ elseif item_available(sprites.flipper) and is_on_terrain_type(flag.deep_water) and not btn_2_down then
   bobby.dive = max_diving_delay
- elseif item_available(spr_bomb) and current_bomb == nil then
+ elseif item_available(sprites.bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
- elseif item_available(spr_gps) then
+ elseif item_available(sprites.gps) then
   state = game_state.state_gps
  end
  btn_2_down = true
@@ -403,11 +405,11 @@ end
 
 function config_bobby(sx,sy)
  local orientation
- local water = (sx==0 and sy==0) and spr_water_standing or spr_water_walk
+ local water = (sx==0 and sy==0) and sprites.water_standing or sprites.water_walk
  if is_on_terrain_type(flag.deep_water) then
   move_speed = 1
   if bobby.dive > 0 then
-   orientation = spr_dive
+   orientation = sprites.dive
   else
    orientation = swimming_sprite(sx,sy)
   end
@@ -447,13 +449,13 @@ end
 function walking_sprite(sx,sy)
  local sprite
  if not (sx == 0) then
-  sprite = spr_side
+  sprite = sprites.side
  elseif sy > 0 then
-  sprite = spr_front
+  sprite = sprites.front
  elseif sy < 0 then
-  sprite = spr_back
+  sprite = sprites.back
  else
-  sprite = spr_standing
+  sprite = sprites.standing
  end
  return sprite
 end
@@ -461,11 +463,11 @@ end
 function swimming_sprite(sx,sy)
  local sprite
  if not (sx == 0) then
-  sprite = spr_swim_side
+  sprite = sprites.swim_side
  elseif sy < 0 then
-  sprite = spr_swim_back
+  sprite = sprites.swim_back
  else
-  sprite = spr_swim_front
+  sprite = sprites.swim_front
  end
  return sprite
 end
@@ -522,7 +524,7 @@ end
 
 function should_move()
 	local cells = collision_cells()
-	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(spr_flipper))
+	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(sprites.flipper))
 end
 
 function collide_with(cells,flag)
@@ -541,33 +543,33 @@ function open_treasure_if_needed()
     if keys > 0 then
      sfx(2)
      if is_terrain_type(mget(cell.x-1,cell.y), flag.treasure) then
-      spr(spr_big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x-1,cell.y-1,spr_big_treasure_opened1)
-      spr(spr_big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x,cell.y-1,spr_big_treasure_opened2)
-      spr(spr_big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x-1,cell.y,spr_big_treasure_opened3)
-      spr(spr_big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x,cell.y,spr_big_treasure_opened4)
+      spr(sprites.big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x-1,cell.y-1,sprites.big_treasure_opened1)
+      spr(sprites.big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,sprites.big_treasure_opened2)
+      spr(sprites.big_treasure_opened3, (cell.x-1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x-1,cell.y,sprites.big_treasure_opened3)
+      spr(sprites.big_treasure_opened4, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,sprites.big_treasure_opened4)
      else
-      spr(spr_big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x,cell.y-1,spr_big_treasure_opened1)
-      spr(spr_big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
-    	 mset(cell.x+1,cell.y-1,spr_big_treasure_opened2)
-      spr(spr_big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x,cell.y,spr_big_treasure_opened3)
-      spr(spr_big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
-    	 mset(cell.x+1,cell.y,spr_big_treasure_opened4)
+      spr(sprites.big_treasure_opened1, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x,cell.y-1,sprites.big_treasure_opened1)
+      spr(sprites.big_treasure_opened2, (cell.x+1) * 8 + map_x, (cell.y-1) * 8 + map_y)
+    	 mset(cell.x+1,cell.y-1,sprites.big_treasure_opened2)
+      spr(sprites.big_treasure_opened3, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x,cell.y,sprites.big_treasure_opened3)
+      spr(sprites.big_treasure_opened4, (cell.x+1) * 8 + map_x, cell.y * 8 + map_y)
+    	 mset(cell.x+1,cell.y,sprites.big_treasure_opened4)
      end
      keys -= 1
      move_count = 0
-     current_spr = set_current_spr(spr_open_treasure)
-     water_spr = spr_water_standing
+     current_spr = set_current_spr(sprites.open_treasure)
+     water_spr = sprites.water_standing
      activate_treasure(cell)
      return
     else
      draw_text("hum... i need a key !",25,0,7)
-     current_spr = spr_standing
+     current_spr = sprites.standing
      draw_bobby()
      delay_co = cocreate(delay)
      coresume(delay_co,15)
@@ -578,8 +580,8 @@ function open_treasure_if_needed()
     mset(cell.x, cell.y, cell.sprite +1)
     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
    	move_count = 0
-    current_spr = set_current_spr(spr_open_treasure)
-    water_spr = spr_water_standing
+    current_spr = set_current_spr(sprites.open_treasure)
+    water_spr = sprites.water_standing
     activate_treasure(cell)
     return
    end
@@ -592,11 +594,11 @@ function activate_treasure(cell)
   if t.x == cell.x and t.y == cell.y then
    if not one_shot_item(t.sprite) then
     add(items,t)
-   elseif t.sprite == heart_full then
+   elseif t.sprite == sprites.heart_full then
     life = min(life + heart_value,hearts * heart_value)
-   elseif t.sprite == spr_heart_increment then
+   elseif t.sprite == sprites.heart_increment then
     hearts += 1
-   elseif t.sprite == spr_key then
+   elseif t.sprite == sprites.key then
     keys += 1
    end
    spr(t.sprite,bobby.x, bobby.y - 10)
@@ -772,13 +774,13 @@ function animate_textures()
    c = mget(i,j)
    if (tick%21) == 0 then
     if is_terrain_type(c,flag.water) then
-     mset(i,j,spr_water + tick%2)
+     mset(i,j,sprites.water + tick%2)
     elseif is_terrain_type(c,flag.deep_water) then
-     mset(i,j,spr_deep_water + tick%2)
+     mset(i,j,sprites.deep_water + tick%2)
     end
    elseif (tick%29) == 0 then
     if is_teleport(c) then
-     mset(i,j,spr_teleport1+ tick%2)
+     mset(i,j,sprites.teleport1+ tick%2)
     end
    end
   end
@@ -789,11 +791,11 @@ function draw_hud()
  local h
  for i=1,hearts do
   if ceil(life/heart_value) < i then
-   h = heart_empty
+   h = sprites.heart_empty
   elseif life < (i * heart_value) then
-   h = heart_full + (life - i * heart_value) % heart_value
+   h = sprites.heart_full + (life - i * heart_value) % heart_value
   else
-   h = heart_full
+   h = sprites.heart_full
   end
   spr(h,i*7,120,1,1)
  end
@@ -801,12 +803,12 @@ function draw_hud()
  for item in all(items) do
    spr(item.sprite,128 - n*8,0)
   if n == selected_item then
-   spr(spr_selected_item,128 - n*8,0)
+   spr(sprites.selected_item,128 - n*8,0)
   end
   n += 1
  end
  if keys > 0 then
-  spr(spr_key,0,0)
+  spr(sprites.key,0,0)
   print("x"..keys,8,2,7)
  end
 end
@@ -826,13 +828,13 @@ function handle_bombs()
   if current_bomb.count_down <= 0 then
    bomb_explode()
   else
-   spr(spr_bomb,current_bomb.x + map_x,current_bomb.y + map_y)
+   spr(sprites.bomb,current_bomb.x + map_x,current_bomb.y + map_y)
   end
  end
 end
 
 function bomb_explode()
- local sprite = spr_bomb + flr(abs(current_bomb.count_down)/refresh_rate)
+ local sprite = sprites.bomb + flr(abs(current_bomb.count_down)/refresh_rate)
  spr(sprite,current_bomb.x + map_x,current_bomb.y + map_y)
  if current_bomb.count_down == 0 then 
   handle_bomb_damage()
@@ -871,7 +873,7 @@ function injured(damage)
 end
 
 function kill_bobby()
- current_spr = spr_dead
+ current_spr = sprites.dead
  state = game_state.state_dead
  loose_co = cocreate(delay)
  coresume(loose_co,120,loose_game)
