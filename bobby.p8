@@ -5,12 +5,14 @@ __lua__
 --  by absolut.renal (2016)
 
 -- controls
-up = 2
-down = 3
-left = 0
-right = 1
-btn_1 = 5
-btn_2 = 4
+controls = {
+ up = 2,
+ down = 3,
+ left = 0,
+ right = 1,
+ btn_1 = 5,
+ btn_2 = 4
+}
 
 -- game states
 game_state = {
@@ -21,6 +23,7 @@ game_state = {
 	state_dead = 4,
 	state_loose = 5
 }
+
 -- sprites
 sprites = {
  front = 0,
@@ -95,8 +98,12 @@ flag = {
  teleport = 7
 }
 --- kind of
-kind_door = {4,7}
-kind_teleport = {7}
+kind = {
+ door = {4,7},
+ teleport = {7},
+ treasure = {0,4},
+ closed_treasure = {0,4,6}
+}
 
 
 -- game config
@@ -162,7 +169,7 @@ function detect_teleports()
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
-   if is_teleport(s) then
+   if is_kind_of(s, kind.teleport) then
     add(teleports,{x=i,y=j})
    end
   end
@@ -249,7 +256,7 @@ end
 
 function handle_game_update()
 	if tick%refresh_rate == 0 then
-	 if is_on_teleport() then
+	 if is_on_terrain_type(kind.teleport) then
 	  local bobby_mid = get_bobby_mid()
 	  for i=1,count(teleports) do
 	   if bobby_mid.x == teleports[i].x and bobby_mid.y == teleports[i].y then
@@ -265,12 +272,12 @@ function handle_game_update()
 	 end
 	
 		move_speed = walking
-		if btn(btn_2) then
+		if btn(controls.btn_2) then
 			use_item()
 		else
 		 stop_item()
 		end
-		if btn(btn_1) then
+		if btn(controls.btn_1) then
 		 select_item()
 		else
 		 btn_1_down = false
@@ -336,7 +343,7 @@ function teleport_bobby_to(p)
 end
 
 function handle_gps_update()
- if not btn(btn_2) then
+ if not btn(controls.btn_2) then
   state = game_state.state_game
  end
 end
@@ -385,13 +392,13 @@ function stop_item()
 end
 
 function move_bobby()
-	if btn(down) then
+	if btn(controls.down) then
 		config_bobby(0,1)
-	elseif btn(up) then
+	elseif btn(controls.up) then
 		config_bobby(0,-1)
-	elseif btn(left) then
+	elseif btn(controls.left) then
 		config_bobby(-1,0)
-	elseif btn(right) then
+	elseif btn(controls.right) then
 		config_bobby(1,0)
 	else
 		stop_walking()
@@ -485,19 +492,16 @@ end
 function is_kind_of(sprite, flags)
  local bit = 0
  for flag in all(flags) do
-  bit += sqrt(flag)
+  bit += shl(1, flag)
  end
  return fget(sprite) == bit
 end
 
 function has_trait_type(sprite, flags)
- local b = true
- for flag in all(flags) do
-  b = b and fget(sprite,flag)
- end
- return b
+ return fget(sprite, flags)
 end
 
+--[[
 function is_terrain_type(sprite, flags)
  local b = true
  for flag in all(flags) do
@@ -505,21 +509,16 @@ function is_terrain_type(sprite, flags)
  end
  return b
 end
+]]
 
 function is_on_terrain_type(t)
  local bobby_mid = get_bobby_mid()
  local cell = mget(bobby_mid.x,bobby_mid.y)
- return is_terrain_type(cell,t)
-end
-
-function is_teleport(sprite)
- return is_terrain_type(sprite, flag.teleport) and not is_terrain_type(sprite, flag.door)
-end
-
-function is_on_teleport()
- local bobby_mid = get_bobby_mid()
- local cell = mget(bobby_mid.x,bobby_mid.y)
- return is_teleport(cell)
+ if type(t) == "number" then
+  return has_trait_type(cell, t)
+ elseif type(t) == "table" then
+  return is_kind_of(cell, t)
+ end
 end
 
 function should_move()
@@ -527,10 +526,14 @@ function should_move()
 	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(sprites.flipper))
 end
 
-function collide_with(cells,flag)
+function collide_with(cells,flags)
  local is_colliding = false
  for cell in all(cells) do
-  is_colliding = is_colliding or is_terrain_type(cell.sprite,flag)
+  if type(flags) == "number" then
+   is_colliding = is_colliding or has_trait_type(cell.sprite,flags)
+  elseif type(flags) == "table" then
+   is_colliding = is_colliding and is_kind_of(cell.sprite,flags)
+  end
  end
  return is_colliding
 end
@@ -539,10 +542,10 @@ function open_treasure_if_needed()
  if bobby.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
-   if collide_with({cell},flag.treasure) and collide_with({cell},flag.need_key) then
+   if collide_with({cell},kind.closed_treasure) then
     if keys > 0 then
      sfx(2)
-     if is_terrain_type(mget(cell.x-1,cell.y), flag.treasure) then
+     if is_terrain_type(mget(cell.x-1,cell.y), kind.closed_treasure) then
       spr(sprites.big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
     	 mset(cell.x-1,cell.y-1,sprites.big_treasure_opened1)
       spr(sprites.big_treasure_opened2, cell.x * 8 + map_x, (cell.y-1) * 8 + map_y)
@@ -575,7 +578,7 @@ function open_treasure_if_needed()
      coresume(delay_co,15)
      return
     end
-   elseif collide_with({cell},flag.treasure) and not collide_with({cell},flag.need_key) then
+   elseif collide_with({cell},kind.treasure) then
     sfx(2)
     mset(cell.x, cell.y, cell.sprite +1)
     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
@@ -773,13 +776,13 @@ function animate_textures()
   for j=m,m+16 do
    c = mget(i,j)
    if (tick%21) == 0 then
-    if is_terrain_type(c,flag.water) then
+    if has_trait_type(c,flag.water) then
      mset(i,j,sprites.water + tick%2)
-    elseif is_terrain_type(c,flag.deep_water) then
+    elseif has_trait_type(c,flag.deep_water) then
      mset(i,j,sprites.deep_water + tick%2)
     end
    elseif (tick%29) == 0 then
-    if is_teleport(c) then
+    if is_kind_of(c, kind.teleport) then
      mset(i,j,sprites.teleport1+ tick%2)
     end
    end
@@ -816,7 +819,7 @@ end
 function draw_background_if_behind()
  local cells = current_overlaped_cells()
  for c in all(cells) do
-  if is_terrain_type(c.cell,flag.behind) then
+  if has_trait_type(c.cell,flag.behind) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
@@ -851,7 +854,7 @@ function handle_bomb_damage()
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
-  if is_terrain_type(cell.sprite, flag.destroyable) then
+  if has_trait_type(cell.sprite, flag.destroyable) then
    mset(cell.x, cell.y, cell.sprite +1)
   end
  end
