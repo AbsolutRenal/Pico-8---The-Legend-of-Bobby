@@ -471,15 +471,15 @@ function config_bobby(sx,sy)
 	local min_y = 0
 	local max_y = 128 - screen_offset
 	if should_move() then
-		if (dest_x <= map_move_offset and map_x < 0 and sx == -1) or (dest_x >= 128 - map_move_offset and map_x > -map_max_x and sx == 1) then
+		if not is_indoor() and ((dest_x <= map_move_offset and map_x < 0 and sx == -1) or (dest_x >= 128 - map_move_offset and map_x > -map_max_x and sx == 1)) then
 			dest = map_x - sx * move_speed
 			map_x = min(max(-map_max_x,dest),0)
 		else
 			bobby.x = min(max(dest_x,min_x),max_x)
 		end
-		if (dest_y <= map_move_offset and map_y < 0 and sy == -1) or (dest_y >= 128 - map_move_offset and map_y > -map_max_y and sy == 1) then
+		if not is_indoor() and ((dest_y <= map_move_offset and map_y < 0 and sy == -1) or (dest_y >= 128 - map_move_offset and map_y > -map_max_y and sy == 1)) then
 			dest = map_y - sy * move_speed
-			map_y  = min(max(-map_max_y,dest),0)
+			map_y = min(max(-map_max_y,dest),0)
 		else
 			bobby.y = min(max(dest_y,min_y),max_y)
 		end
@@ -764,7 +764,9 @@ function draw_gps()
   pset(m_offset_x + i%map_x_tiles, m_offset_y + flr(i/map_x_tiles), col)
   i	+= 1
  end
- circ(m_offset_x + flr((bobby.x - map_x)/8), flr((bobby.y - map_y)/8) + m_offset_y, 2, 8)
+ if not is_indoor() then
+  circ(m_offset_x + flr((bobby.x - map_x)/8), flr((bobby.y - map_y)/8) + m_offset_y, 2, 8)
+ end
 end
 
 function draw_game()
