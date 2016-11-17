@@ -302,9 +302,9 @@ end
 function destination_for_door_at(cell)
  for door in all(doors) do
   if door.inn.x == cell.x and door.inn.y == cell.y then
-   return {x=door.out.x + door.out.offset_x, y=door.out.y + door.out.offset_y}
+   return {x=door.out.x, offset_x=door.out.offset_x, y=door.out.y, offset_y=door.out.offset_y}
   elseif door.out.x == cell.x and door.out.y == cell.y then
-   return {x=door.inn.x + door.inn.offset_x, y=door.inn.y + door.inn.offset_y}
+   return {x=door.inn.x, offset_x=door.inn.offset_x, y=door.inn.y, offset_y=door.inn.offset_y}
   end
  end
 end
@@ -345,8 +345,8 @@ end
 
 function teleport_bobby_to(p, offset_x, offset_y)
  if is_indoor(p.x) then
-  local dest_x = p.x * 8
-  local dest_y = p.y * 8
+  local dest_x = (p.x+offset_x) * 8
+  local dest_y = (p.y+offset_y) * 8
   local mod_x = dest_x % 128
   local mod_y = dest_y % 128
   map_x = -dest_x + mod_x
