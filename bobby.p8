@@ -132,8 +132,6 @@ end
 function init_game()
 	--poke(0x5f2c,7)
 	move_speed = walking
-	palt(0,false)
-	palt(alpha_color,true)
 	map_x = 0
 	map_y = 0
 	tick = 0
@@ -730,7 +728,14 @@ function ceil(x)
 	return -flr(-x)
 end
 
+function reset_palette()
+ pal()
+ palt(0,false)
+	palt(alpha_color,true)
+end
+
 function _draw()
+ reset_palette()
  if state == game_state.state_opening then
   draw_display(true,launch)
  elseif state == game_state.state_game then
@@ -773,6 +778,9 @@ function draw_game()
  if not should_draw then
   return
  end
+ if is_indoor() then
+	 dimm_screen()
+	end
 	draw_map()
 	open_treasure_if_needed()
  handle_bombs()
@@ -780,7 +788,20 @@ function draw_game()
  draw_bobby()
  animate_textures()
 	draw_background_if_behind()
+	reset_palette()
  draw_hud()
+end
+
+function dimm_screen()
+ local i=0
+ while i < 16 do
+  pal(i, 0, 0)
+  i += 1
+ end
+ pal(8, 2, 0)
+ pal(9, 4, 0)
+ pal(15, 4, 0)
+ pal(1, 1, 0)
 end
 
 function draw_map()
