@@ -121,6 +121,8 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
+candle_decay = 2
+big_candle_decay = 4
 treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}}
 
@@ -784,9 +786,6 @@ function draw_game()
  handle_bombs()
  bobby.injured = max(bobby.injured -1, 0)
  animate_textures()
-	--[[if item_available(sprites.candle) then
-	 reset_palette()
-	end]]
  handle_indoor_display()
 	draw_bobby()
  dimm_screen_if_needed()
@@ -816,7 +815,17 @@ function dimm_screen_if_needed()
 end
 
 function draw_light()
- 
+ local p = get_bobby_mid()
+ local bob
+ local hitbox = {x=0,y=0,width=0,height=0}
+ for j=p.y-candle_decay,p.y+candle_decay do
+  for i=p.x-candle_decay,p.x+candle_decay do
+   bob = {x=p.x,y=p.y,hitbox=hitbox}
+   if distance(bob,{x=i,y=j,hitbox=hitbox}) <= candle_decay then
+    spr(mget(i,j), i*8 + map_x, j*8 + map_y)
+   end
+  end
+ end
 end
 
 function draw_exit()
