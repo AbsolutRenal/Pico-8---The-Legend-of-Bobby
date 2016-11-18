@@ -784,23 +784,27 @@ function draw_game()
  handle_bombs()
  bobby.injured = max(bobby.injured -1, 0)
  animate_textures()
-	if item_available(sprites.candle) then
+	--[[if item_available(sprites.candle) then
 	 reset_palette()
-	end
+	end]]
+ handle_indoor_display()
 	draw_bobby()
  dimm_screen_if_needed()
  draw_background_if_behind()
 	reset_palette()
- handle_indoor_display()
  draw_hud()
 end
 
 function handle_indoor_display()
  if is_indoor() then
+  reset_palette()
   if item_available(sprites.candle) then
-   
+   draw_light()
   else
    draw_exit()
+  end
+  if not item_available(sprites.candle) then
+   dimm_screen()
   end
  end
 end
@@ -811,15 +815,18 @@ function dimm_screen_if_needed()
 	end
 end
 
+function draw_light()
+ 
+end
+
 function draw_exit()
- local n = ceil(-map_x/8)
- local k = ceil(-map_y/8)
+ local k = ceil(-map_x/8)
+ local n = ceil(-map_y/8)
  local s
  for j=n,n+16 do
   for i=k,k+16 do
    s = mget(i,j)
    if is_kind_of(s, kind.door) then
-    print("yup")
     spr(s, map_x + i*8, map_y + j*8)
    end
   end
@@ -835,6 +842,7 @@ function dimm_screen()
  pal(8, 2, 0)
  pal(9, 4, 0)
  pal(15, 4, 0)
+ pal(1, 1, 0)
 end
 
 function draw_map()
