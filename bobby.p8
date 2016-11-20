@@ -121,10 +121,15 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-candle_decay = 2
+candle_decay = 1
 big_candle_decay = 4
 treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}}
+
+palette = {
+ no_candle = {0,1,0,0,0,0,0,0,2,4,0,0,0,0,0,4},
+ shadow = {0,0,1,3,5,1,5,6,8,9,10,3,1,1,2,15}
+}
 
 -- func
 function _init()
@@ -796,32 +801,35 @@ end
 
 function handle_indoor_display()
  if is_indoor() then
-  reset_palette()
   if item_available(sprites.candle) then
-   draw_light()
+   dimm_screen(palette.shadow)
+   draw_light(candle_decay+1)
+   reset_palette()
+   draw_light(candle_decay)
   else
+   reset_palette()
    draw_exit()
   end
   if not item_available(sprites.candle) then
-   dimm_screen()
+   dimm_screen(palette.no_candle)
   end
  end
 end
 
 function dimm_screen_if_needed()
  if is_indoor() then
-	 dimm_screen()
+	 dimm_screen(palette.no_candle)
 	end
 end
 
-function draw_light()
+function draw_light(size)
  local p = get_bobby_mid()
  local bob
  local hitbox = {x=0,y=0,width=0,height=0}
- for j=p.y-candle_decay,p.y+candle_decay do
-  for i=p.x-candle_decay,p.x+candle_decay do
+ for j=p.y-size,p.y+size do
+  for i=p.x-size,p.x+size do
    bob = {x=p.x,y=p.y,hitbox=hitbox}
-   if distance(bob,{x=i,y=j,hitbox=hitbox}) <= candle_decay then
+   if distance(bob,{x=i,y=j,hitbox=hitbox}) <= size then
     spr(mget(i,j), i*8 + map_x, j*8 + map_y)
    end
   end
@@ -842,16 +850,12 @@ function draw_exit()
  end
 end
 
-function dimm_screen()
+function dimm_screen(palette)
  local i=0
  while i < 16 do
-  pal(i, 0, 0)
+  pal(i, palette[i+1], 0)
   i += 1
  end
- pal(8, 2, 0)
- pal(9, 4, 0)
- pal(15, 4, 0)
- pal(1, 1, 0)
 end
 
 function draw_map()
