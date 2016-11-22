@@ -115,7 +115,7 @@ kind = {
 -- game config
 alpha_color = 14
 bomb_damage = 3
-refresh_rate = 1
+refresh_rate = 2
 walking = 1
 running = 1.5
 max_diving_delay = 60
@@ -271,7 +271,7 @@ function _update()
 end
 
 function handle_game_update()
-	if tick%refresh_rate == 0 then
+	--if tick%refresh_rate == 0 then
 	 if is_on_terrain_type(flag.teleport) then
 	  local bobby_mid = get_bobby_mid()
 	  
@@ -306,7 +306,7 @@ function handle_game_update()
 		 btn_1_down = false
 		end
 		move_bobby()
-	end
+	--end
 end
 
 function destination_for_door_at(cell)
@@ -524,7 +524,7 @@ function swimming_sprite(sx,sy)
 end
 
 function set_current_spr(orientation)
- return orientation + (move_count%2)
+ return orientation + (move_count%refresh_rate)
 end
 
 function get_bobby_mid()
