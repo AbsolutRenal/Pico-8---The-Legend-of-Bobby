@@ -86,7 +86,28 @@ sprites = {
  bomb = 57,
  key = 62,
  candle = 66,
- big_candle = 67
+ big_candle = 67,
+ 
+ rounded_water_1 = 96,
+ rounded_water_2 = 97,
+ rounded_water_3 = 98,
+ rounded_water_4 = 99,
+ rounded_water_5 = 120,
+ rounded_water_6 = 121,
+ rounded_water_7 = 122,
+ rounded_water_8 = 123,
+ rounded_deep_water_1 = 100,
+ rounded_deep_water_2 = 101,
+ rounded_deep_water_3 = 102,
+ rounded_deep_water_4 = 103,
+ rounded_sand_1 = 104,
+ rounded_sand_2 = 105,
+ rounded_sand_3 = 106,
+ rounded_sand_4 = 107,
+ rounded_sand_5 = 112,
+ rounded_sand_6 = 113,
+ rounded_sand_7 = 114,
+ rounded_sand_8 = 115
 }
 
 -- flags
@@ -224,17 +245,17 @@ end
 
 function color_for_sprite(sprite)
  local col = background_color
- if sprite == sprites.water or sprite == sprites.water2 then
+ if sprite == sprites.water or sprite == sprites.water2 or sprite == sprites.rounded_water_1 or sprite == sprites.rounded_water_2 or sprite == sprites.rounded_water_3 or sprite == sprites.rounded_water_4 or sprite == sprites.rounded_water_5 or sprite == sprites.rounded_water_6 or sprite == sprites.rounded_water_7 or sprite == sprites.rounded_water_8 then
   col = 13
- elseif sprite == sprites.deep_water or sprite == sprites.deep_water2 then
+ elseif sprite == sprites.deep_water or sprite == sprites.deep_water2 or sprite == sprites.rounded_deep_water_1 or sprite == sprites.rounded_deep_water_2 or sprite == sprites.rounded_deep_water_3 or sprite == sprites.rounded_deep_water_4 then
   col = 1
- elseif sprite == sprites.sand then
+ elseif sprite == sprites.sand or sprite == sprites.rounded_sand_1 or sprite == sprites.rounded_sand_2 or sprite == sprites.rounded_sand_3 or sprite == sprites.rounded_sand_4 or sprite == sprites.rounded_sand_5 or sprite == sprites.rounded_sand_6 or sprite == sprites.rounded_sand_7 or sprite == sprites.rounded_sand_8 then
   col = 10
  elseif sprite == sprites.small_tree or sprite == sprites.tree1 or sprite == sprites.tree2 or sprite == sprites.tree3 or sprite == sprites.tree4 then
   col = 11
  elseif sprite == sprites.rock1 or sprite == sprites.rock2 or sprite == sprites.rock3 or sprite == sprites.rock4 then
   col = 5
- elseif sprite == sprites.treasure1 or sprite == sprites.treasure8 or sprite == sprites.treasure2 or sprite == sprites.treasure3 or sprite == sprites.treasure4 or sprite == sprites.treasure5 or sprite == sprites.treasure6 or sprite == sprites.treasure7 then
+ elseif sprite == sprites.treasure1 or sprite == sprites.treasure2 or sprite == sprites.treasure3 or sprite == sprites.treasure4 or sprite == sprites.treasure5 or sprite == sprites.treasure6 or sprite == sprites.treasure7 or sprite == sprites.treasure8 then
   col = 9
  elseif sprite == sprites.teleport1 or sprite == sprites.teleport2 then
   col = 2
