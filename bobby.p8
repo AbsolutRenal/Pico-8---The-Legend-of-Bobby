@@ -138,6 +138,7 @@ kind = {
 -- game config
 alpha_color = 14
 bomb_damage = 3
+hole_damage = 2
 refresh_rate = 2
 walking = 1
 running = 1.5
@@ -314,7 +315,7 @@ function handle_game_update()
 	   end
 	  elseif is_on_terrain_type(kind.door) then
 	   local dest = destination_for_door_at(bobby_mid)
-    teleport_bobby_to(dest, dest.offset_x, dest.offset_y)  
+    teleport_bobby_to(dest, dest.offset_x, dest.offset_y)
 	   return
 	  end
 	 end
@@ -335,7 +336,11 @@ function handle_game_update()
 end
 
 function falling_anim()
- local last_safe =  
+ local current_position = get_bobby_mid()
+ local last_safe = {x=current_position.x - bobby.sx, y=current_position.y - bobby.sy}
+ teleport_bobby_stretch(true, 1, 1)
+ teleport_bobby_to(last_safe, 0, 0)
+ injured(hole_damage)
 end
 
 function destination_for_door_at(cell)
@@ -350,24 +355,24 @@ end
 
 function teleport_anim(idx)
  sfx(0)
- teleport_bobby_stretch(true)
+ teleport_bobby_stretch(true, 2, -4)
  teleport_bobby_to(teleports[idx], 1, 0)
- teleport_bobby_stretch(false)
+ teleport_bobby_stretch(false, 2, -4)
 end
 
-function teleport_bobby_stretch(out)
+function teleport_bobby_stretch(out, dsx, dsy)
  if out then
   anim={width=8,height=8}
   while anim.width > 0 do
-	  anim.width -= 2
-	  anim.height += 4
+	  anim.width -= dsx
+	  anim.height -= dsy
 	  draw_teleport_anim()
 	 end
 	else
 	 anim={width=0,height=24}
 		while anim.width < 8 do
-	  anim.width += 2
-	  anim.height -= 4
+	  anim.width += dsx
+	  anim.height += dsy
 	  draw_teleport_anim()
 	 end
 	end
