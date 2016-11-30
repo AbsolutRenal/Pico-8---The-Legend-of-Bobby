@@ -336,10 +336,10 @@ function handle_game_update()
 end
 
 function falling_anim()
- local current_position = get_bobby_mid()
- local last_safe = {x=current_position.x - bobby.sx, y=current_position.y - bobby.sy}
+ local last_safe = {x=bobby.x - bobby.sx*8, y=bobby.y - bobby.sy*8}
  teleport_bobby_stretch(true, 1, 1)
- teleport_bobby_to(last_safe, 0, 0)
+ bobby.x = last_safe.x
+ bobby.y = last_safe.y
  injured(hole_damage)
 end
 
