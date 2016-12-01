@@ -297,7 +297,8 @@ end
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
 	 if is_on_terrain_type(kind.hole) then
-	 delay_co = cocreate(falling_anim)
+	  delay_co = cocreate(falling_anim)
+	  return
 	 elseif is_on_terrain_type(flag.teleport) then
 	  local bobby_mid = get_bobby_mid()
 	  
@@ -379,10 +380,13 @@ function teleport_bobby_stretch(out, dsx, dsy)
 end
 
 function draw_teleport_anim()
+ dimm_screen_if_needed()
  draw_map()
- handle_bombs()
+ handle_indoor_display()
  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
+ handle_bombs()
  animate_textures()
+ reset_palette()
  draw_hud()
  yield()
 end
@@ -812,11 +816,15 @@ function _draw()
 end
 
 function draw_dead_state()
+ dimm_screen_if_needed()
 	draw_map()
- handle_bombs()
+ handle_indoor_display()
  draw_bobby()
+ handle_bombs()
+ dimm_screen_if_needed()
  animate_textures()
 	draw_background_if_behind()
+	reset_palette()
 	draw_hud()
  draw_text("˜ you loose ˜",36,1,8)
 end
