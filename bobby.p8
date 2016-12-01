@@ -338,7 +338,7 @@ end
 
 function falling_anim()
  local last_safe = {x=bobby.x - bobby.sx*8, y=bobby.y - bobby.sy*8}
- teleport_bobby_stretch(true, 1.5, 1.5)
+ teleport_bobby_stretch(true, 2, 2)
  bobby.x = last_safe.x
  bobby.y = last_safe.y
  injured(hole_damage)
