@@ -25,7 +25,7 @@ game_state = {
 }
 
 -- sprites
-sprites = {
+moves = {
  front = 0,
  back = 2,
  side = 4,
@@ -35,12 +35,15 @@ sprites = {
  swim_front = 18,
  swim_back = 20,
  swim_side = 22,
- water_walk = 12,
- water_standing = 44,
  diagonal_front = 110,
  diagonal_back = 108,
- dead = 63,
+ dead = 63
+}
+
+sprites = {
  water = 36,
+ water_walk = 12,
+ water_standing = 44,
  deep_water = 52,
  water2 = 37,
  deep_water2 = 53,
@@ -173,7 +176,7 @@ function init_game()
 	map_x = 0
 	map_y = 0
 	tick = 0
-	current_spr = sprites.standing
+	current_spr = moves.standing
 	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
 	background_color = 3
 	move_count = 0
@@ -406,7 +409,7 @@ function teleport_bobby_to(p, offset_x, offset_y)
  else
   bobby.x = 64
   bobby.y = 64
-  current_spr = sprites.standing
+  current_spr = moves.standing
   map_x = 64 - (p.x+offset_x) * 8
   map_y = 64 - (p.y+offset_y) * 8
   if map_x > 0 then
@@ -507,7 +510,7 @@ function config_bobby(sx,sy)
  if is_on_terrain_type(flag.deep_water) then
   move_speed = walking * 0.5
   if bobby.dive > 0 then
-   orientation = sprites.dive
+   orientation = moves.dive
   else
    orientation = swimming_sprite(sx,sy)
   end
@@ -547,15 +550,15 @@ end
 function walking_sprite(sx,sy)
  local sprite
  if not (sx == 0) and not (sy == 0) then
-  sprite = (sy < 0) and sprites.diagonal_back or sprites.diagonal_front
+  sprite = (sy < 0) and moves.diagonal_back or moves.diagonal_front
  elseif not (sx == 0) then
-  sprite = sprites.side
+  sprite = moves.side
  elseif sy > 0 then
-  sprite = sprites.front
+  sprite = moves.front
  elseif sy < 0 then
-  sprite = sprites.back
+  sprite = moves.back
  else
-  sprite = sprites.standing
+  sprite = moves.standing
  end
  return sprite
 end
@@ -563,11 +566,11 @@ end
 function swimming_sprite(sx,sy)
  local sprite
  if not (sx == 0) then
-  sprite = sprites.swim_side
+  sprite = moves.swim_side
  elseif sy < 0 then
-  sprite = sprites.swim_back
+  sprite = moves.swim_back
  else
-  sprite = sprites.swim_front
+  sprite = moves.swim_front
  end
  return sprite
 end
@@ -659,13 +662,13 @@ function open_treasure_if_needed()
      end
      keys -= 1
      move_count = 0
-     current_spr = set_current_spr(sprites.open_treasure)
+     current_spr = set_current_spr(moves.open_treasure)
      water_spr = sprites.water_standing
      activate_treasure(cell)
      return
     else
      draw_text("hum... i need a key !",25,0,7)
-     current_spr = sprites.standing
+     current_spr = moves.standing
      draw_bobby()
      delay_co = cocreate(delay)
      coresume(delay_co,15)
@@ -676,7 +679,7 @@ function open_treasure_if_needed()
     mset(cell.x, cell.y, cell.sprite +1)
     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
    	move_count = 0
-    current_spr = set_current_spr(sprites.open_treasure)
+    current_spr = set_current_spr(moves.open_treasure)
     water_spr = sprites.water_standing
     activate_treasure(cell)
     return
@@ -1059,7 +1062,7 @@ function injured(damage)
 end
 
 function kill_bobby()
- current_spr = sprites.dead
+ current_spr = moves.dead
  state = game_state.state_dead
  loose_co = cocreate(delay)
  coresume(loose_co,120,loose_game)
