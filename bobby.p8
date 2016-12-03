@@ -37,6 +37,8 @@ sprites = {
  swim_side = 22,
  water_walk = 12,
  water_standing = 44,
+ diagonal_front = 110,
+ diagonal_back = 108,
  dead = 63,
  water = 36,
  deep_water = 52,
@@ -474,17 +476,24 @@ function stop_item()
 end
 
 function move_bobby()
+ local sx = 0
+ local sy= 0
+ 
 	if btn(controls.down) then
-		config_bobby(0,1)
+		sy = 1
 	elseif btn(controls.up) then
-		config_bobby(0,-1)
-	elseif btn(controls.left) then
-		config_bobby(-1,0)
-	elseif btn(controls.right) then
-		config_bobby(1,0)
-	else
-		stop_walking()
+		sy = -1
 	end
+	if btn(controls.left) then
+		sx = -1
+	elseif btn(controls.right) then
+		sx = 1
+	end
+	if sx == 0 and sy == 0 then
+		stop_walking()
+		return
+	end
+	config_bobby(sx,sy)
 end
 
 function stop_walking()
@@ -537,7 +546,9 @@ end
 
 function walking_sprite(sx,sy)
  local sprite
- if not (sx == 0) then
+ if not (sx == 0) and not (sy == 0) then
+  sprite = (sy < 0) and sprites.diagonal_back or sprites.diagonal_front
+ elseif not (sx == 0) then
   sprite = sprites.side
  elseif sy > 0 then
   sprite = sprites.front
@@ -1147,14 +1158,14 @@ d1d1161640dd6604ddd01d00ddd01d00ddd00d00d000000000000000000000000000000000000000
 d1ddd61640dd66041dd0d0d61dd0d0d61d000006100000060000000000000000000000000000000009a00a9009a00a9000000000000000000000000000000000
 d111111640000004d00d0d1dd00d001d000d0000000000004000000400000000000000000000000009aaaa9009aaaa9000000000000000000000000000000000
 ddddddd6444444440d6dd0d70d6dd0d7006dd007006dd007e420004e000000000000000000000000000000000000000000000000000000000000000000000000
-1111ddddddddddddddddddcddddd1111ddddd11111111111111111111111dddd3333aaaaaaaa7aaaaa7faaaaaaaa333300000000000000000000000000000000
-11dddcdddddddddddddddcddddcddd11dd1111c111111111111c1111111111dd33aaf7aaaaaaaaaaaaaaaafaafaaaa3300000000000000000000000000000000
-1dddcdddcdddcddddddddddddddcddd1d1111c111c11111111c111c11111c11d3aaaaaaaa7afaaa7aaaaa7aaaa7aaaa300000000000000000000000000000000
-1ddddddddcdddcdddcddddddddddddd1d111111111c11c1111111c111c111c1d3aaaafaaafaaaaaf7aaaaaaaaaaaaaa300000000000000000000000000000000
-ddddddcd1dddddddcddddcd1dddddddd11111111d11111c11111111d11c11111aaaaaaa73aaaaaaaaafaaaa3faaaaafa00000000000000000000000000000000
-ddcddcdd1dddddddddddcdd1ddcdddcd11c11c11d111111111c1111d11111111aa7aaaaa3aaaa7aaaaaaaaa37aaafa7a00000000000000000000000000000000
-dcdddddd11dddcdddddddd11dddcdddc1c11c111dd1111c11c1111dd11111c11afaaaaaa33aaaafaaa7faa33aaaaaaaa00000000000000000000000000000000
-dddddddd1111ddcddddd1111dddddddd11111111dddd111c1111dddd111111c1aaaaf7aa3333aaaaaaaa3333aaa7aaaa00000000000000000000000000000000
+1111ddddddddddddddddddcddddd1111ddddd11111111111111111111111dddd3333aaaaaaaa7aaaaa7faaaaaaaa3333ee000eeeee000eeeee000eeeee000eee
+11dddcdddddddddddddddcddddcddd11dd1111c111111111111c1111111111dd33aaf7aaaaaaaaaaaaaaaafaafaaaa33ee00feeeee00feeeee0ffeeeee0ffeee
+1dddcdddcdddcddddddddddddddcddd1d1111c111c11111111c111c11111c11d3aaaaaaaa7afaaa7aaaaa7aaaa7aaaa3ee888efeee888eeeee888efeee888eee
+1ddddddddcdddcdddcddddddddddddd1d111111111c11c1111111c111c111c1d3aaaafaaafaaaaaf7aaaaaaaaaaaaaa3e88888eeee888eeee88888eee88888fe
+ddddddcd1dddddddcddddcd1dddddddd11111111d11111c11111111d11c11111aaaaaaa73aaaaaaaaafaaaa3faaaaafaef888eeeee888feeef888eeefe888eee
+ddcddcdd1dddddddddddcdd1ddcdddcd11c11c11d111111111c1111d11111111aa7aaaaa3aaaa7aaaaaaaaa37aaafa7aee111eeeee111eeeee111eeeee111eee
+dcdddddd11dddcdddddddd11dddcdddc1c11c111dd1111c11c1111dd11111c11afaaaaaa33aaaafaaa7faa33aaaaaaaaee1e1eeeee1e1eeeee1e1eeeee5e1eee
+dddddddd1111ddcddddd1111dddddddd11111111dddd111c1111dddd111111c1aaaaf7aa3333aaaaaaaa3333aaa7aaaaee1eeeeeeeee1eeeee1eeeeeeeee5eee
 ddddaaaaaafaaaaaaafaaaaaaafaddddaaaa333333333333333333333333aaaaaaaaddddddddddddddddddddddddaaaa00000000000000000000000000000000
 ddaaf7aaaaaaf7aaaaaaf7aaaaaaf7ddaa3333333333333333333333333333aaaadddcddddddcdddddddddcddcddddaa00000000000000000000000000000000
 daaaaaaa7aaaaaaa7aaaaaaa7aaaaaada333333333333333333333333333333aadddcddddcdddcddddcddcddddcdddda00000000000000000000000000000000
