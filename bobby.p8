@@ -892,15 +892,25 @@ end
 
 function handle_breakable_floor()
  for f in all(breakable_floor) do
-  if tick%5 == 0 then
-   f.count_down -= 1
-   local s = f.sprite + break_floor_count_down - f.count_down
-   mset(f.x, f.y, s)
-   if f.count_down == 0 then
-    del(breakable_floor, f)
+  if f.count_down > 0 then
+   if tick%5 == 0 then
+    f.count_down -= 1
+    local s = f.sprite + break_floor_count_down - f.count_down
+    mset(f.x, f.y, s)
    end
+  elseif not is_currently_displayed(f.x, f.y) then
+   mset(f.x, f.y, f.sprite)
+   del(breakable_floor, f)
   end
  end
+end
+
+function is_currently_displayed(x, y)
+ local min_x = flr(-map_x/8)
+ local max_x = min_x + 16
+ local min_y = flr(-map_y/8)
+ local max_y = min_y + 16
+ return x >= min_x and x <= max_x and y >= min_y and y <= max_y
 end
 
 function handle_indoor_display()
