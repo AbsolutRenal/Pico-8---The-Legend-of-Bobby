@@ -309,7 +309,7 @@ function handle_game_update()
 	--if tick%refresh_rate == 0 then
 	 if is_on_terrain_type(kind.breakable_floor) then
 	  local pos = get_bobby_mid()
-	  add(breakable_floor, {x=pos.x, y=pos.y, count_down=break_floor_count_down})
+	  add(breakable_floor, {x=pos.x, y=pos.y,sprite=mget(pos.x,pos.y), count_down=break_floor_count_down})
 	 elseif is_on_terrain_type(kind.hole) then
 	  delay_co = cocreate(falling_anim)
 	  return	 
@@ -894,7 +894,7 @@ function handle_breakable_floor()
  for f in all(breakable_floor) do
   if tick%5 == 0 then
    f.count_down -= 1
-   local s = sprites.breakable_floor + break_floor_count_down - f.count_down
+   local s = f.sprite + break_floor_count_down - f.count_down
    mset(f.x, f.y, s)
    if f.count_down == 0 then
     del(breakable_floor, f)
