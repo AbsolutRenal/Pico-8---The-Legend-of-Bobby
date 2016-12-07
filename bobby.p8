@@ -92,7 +92,7 @@ sprites = {
  key = 62,
  candle = 66,
  big_candle = 67,
- 
+ breakable_floor = 82,
  rounded_water_1 = 96,
  rounded_water_2 = 97,
  rounded_water_3 = 98,
@@ -189,6 +189,8 @@ function init_game()
  life = 9
  hearts = 3
  current_bomb = nil
+ break_floor_count_down = 3
+ breakable_floor = {}
  keys = 0
  selected_item = 1
  map_data = {}
@@ -274,6 +276,8 @@ function color_for_sprite(sprite)
   col = 5
  elseif sprite == sprites.door or sprite == sprites.stairs then
   col = 2
+ elseif sprite == sprites.breakable_floor then
+  col = 13
  end
  return col
 end
@@ -302,6 +306,10 @@ end
 
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
+	 if is_on_terrain_type(kind.breakable_floor) then
+	  local pos = get_bobby_mid()
+	  add(breakable_floor, {x=pos.x, y=pos.y, count_down=break_floor_count_down})
+	 end
 	 if is_on_terrain_type(kind.hole) then
 	  delay_co = cocreate(falling_anim)
 	  return
@@ -873,10 +881,24 @@ function draw_game()
 	open_treasure_if_needed()
 	draw_bobby()
  dimm_screen_if_needed()
+ handle_breakable_floor()
  handle_bombs()
  draw_background_if_behind()
 	reset_palette()
  draw_hud()
+end
+
+function handle_breakable_floor()
+ for f in all(breakable_floor) do
+  if tick%3 == 0 then
+   f.count_down -= 1
+   local s = sprites.breakable_floor + break_floor_count_down - f.count_down
+   mset(f.x, f.y, s)
+   if f.count_down == 0 then
+    del(breakable_floor, f)
+   end
+  end
+ end
 end
 
 function handle_indoor_display()
