@@ -120,23 +120,24 @@ sprites = {
 flag = {
  solid = 0,
  water = 1,
- deep_water = 2,
- behind = 3,
+ door = 2,
+ hole = 3,
  treasure = 4,
  destroyable = 5,
- need_key = 6,
- teleport = 7
+ static = 6,
+ extended = 7
 }
 --- kind of
 kind = {
- hole = {4,6},
--- breakable_floor = {},
- door = {4,7},
- teleport = {7},
+ hole = {3},
+ breakable_floor = {3,7},
+ door = {2},
+ teleport = {2,7},
  treasure = {0,4},
- closed_treasure = {0,4,6},
+ closed_treasure = {0,4,7},
  water = {1},
- deep_water = {2}
+ deep_water = {1,7},
+ behind = {6}
 }
 
 
@@ -304,7 +305,7 @@ function handle_game_update()
 	 if is_on_terrain_type(kind.hole) then
 	  delay_co = cocreate(falling_anim)
 	  return
-	 elseif is_on_terrain_type(flag.teleport) then
+	 elseif is_on_terrain_type(flag.door) then
 	  local bobby_mid = get_bobby_mid()
 	  
 	  if is_on_terrain_type(kind.teleport) then
@@ -436,7 +437,7 @@ function handle_gps_update()
 end
 
 function select_item()
- if not is_on_terrain_type(flag.deep_water) and not btn_1_down then
+ if not is_on_terrain_type(kind.deep_water,true) and not btn_1_down then
   btn_1_down = true
   local nb = count(items)
   if nb > 1 then
@@ -463,7 +464,7 @@ end
 function use_item()
  if item_available(sprites.boots) then
   move_speed = running
- elseif item_available(sprites.flipper) and is_on_terrain_type(flag.deep_water) and not btn_2_down then
+ elseif item_available(sprites.flipper) and is_on_terrain_type(kind.deep_water,true) and not btn_2_down then
   bobby.dive = max_diving_delay
  elseif item_available(sprites.bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
@@ -507,7 +508,7 @@ end
 function config_bobby(sx,sy)
  local orientation
  local water = (sx==0 and sy==0) and sprites.water_standing or sprites.water_walk
- if is_on_terrain_type(flag.deep_water) then
+ if is_on_terrain_type(kind.deep_water,true) then
   move_speed = walking * 0.5
   if bobby.dive > 0 then
    orientation = moves.dive
@@ -594,23 +595,25 @@ function is_kind_of(sprite, flags)
 end
 
 function has_trait_type(sprite, flags)
- return fget(sprite, flags)
+ if type(flags) == "number" then
+  return fget(sprite, flags)
+ elseif type(flags) == "table" then
+  return has_traits(sprite, flags)
+ end
 end
 
---[[
-function is_terrain_type(sprite, flags)
+function has_traits(sprite, flags)
  local b = true
  for flag in all(flags) do
   b = b and fget(sprite,flag)
  end
  return b
 end
-]]
 
-function is_on_terrain_type(t)
+function is_on_terrain_type(t, force_trait)
  local bobby_mid = get_bobby_mid()
  local cell = mget(bobby_mid.x,bobby_mid.y)
- if type(t) == "number" then
+ if type(t) == "number" or force_trait then
   return has_trait_type(cell, t)
  elseif type(t) == "table" then
   return is_kind_of(cell, t)
@@ -619,13 +622,13 @@ end
 
 function should_move()
 	local cells = collision_cells()
-	return not collide_with(cells,flag.solid) and (not collide_with(cells,flag.deep_water) or item_available(sprites.flipper))
+	return not collide_with(cells,flag.solid) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper))
 end
 
-function collide_with(cells,flags)
+function collide_with(cells,flags,force_trait)
  local is_colliding = false
  for cell in all(cells) do
-  if type(flags) == "number" then
+  if type(flags) == "number" or force_trait then
    is_colliding = is_colliding or has_trait_type(cell.sprite,flags)
   elseif type(flags) == "table" then
    is_colliding = is_colliding or is_kind_of(cell.sprite,flags)
@@ -949,7 +952,7 @@ function draw_bobby()
  if bobby.injured % 2 == 0 then
  	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
  end
-	if is_on_terrain_type(flag.water) then
+	if is_on_terrain_type(kind.water,true) then
  	spr(water_spr, bobby.x, bobby.y, 1, 1)
 	end
 end
@@ -1005,7 +1008,7 @@ end
 function draw_background_if_behind()
  local cells = current_overlaped_cells()
  for c in all(cells) do
-  if has_trait_type(c.cell,flag.behind) then
+  if is_kind_of(c.cell,kind.behind) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
@@ -1242,7 +1245,7 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 __gff__
-0000000000000000210008080000080800000000000000001101515111010101080801000202000000000000000000010101010004040021000000000000000080800000000190902100000000000000000000000050500000001101000000008282828284848484000000000000000000000000000000008282828200000000
+00000000000000002100404000004040000000000000000011019191110101014040010002020000000000000000000101010100828200210000000000000000848400000001040421000000000000000000880000080800000011010000000042424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 3434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343445454545454545454645454545454545
