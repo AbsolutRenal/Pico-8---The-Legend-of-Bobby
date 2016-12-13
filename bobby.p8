@@ -320,7 +320,16 @@ function _update()
 end
 
 function spawn_monster_if_needed()
+ for s in all(spawns) do
+  if is_currently_displayed(s.x, s.y) then
+   spawn_monster(s.x, s.y)
+   s.next = random_spawn_delay()
+  end
+ end
+end
 
+function spawn_monster(x, y)
+ 
 end
 
 function handle_game_update()
