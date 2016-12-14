@@ -937,17 +937,31 @@ function draw_game()
  draw_hud()
 end
 
+function monster_can_move(monster)
+ local monster_position = {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx - map_x)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy - map_y)/8)}
+ local s = mget(monster_position.x, monster_position.y)
+ local can = not is_kind_of(s, kind.water) and not is_kind_of(s, kind.deep_water) and not has_trait_type(s, flag.solid) and not is_kind_of(s, kind.danger) and not is_kind_of(s, kind.hole)
+ return can
+end
+
+function switch_monster_direction(monster)
+ monster.sx = random_speed()
+ monster.sy = random_speed() 
+ monster.duration = random_move_duration()
+end
+
 function move_monsters()
  for monster in all(monsters) do
   -- todo !
+  if monster_can_move(monster) then
   monster.x += monster.sx
   monster.y += monster.sy
   monster.duration -= 1
-  
   if monster.duration == 0 then
-   monster.sx = random_speed()
-   monster.sy = random_speed() 
-   monster.duration = random_move_duration()
+   switch_monster_direction(monster)
+  end
+  else
+   switch_monster_direction(monster)
   end
  end
 end
@@ -1376,7 +1390,6 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
-
 __gff__
 0000000000000000210040400000404000000000000000001101919111010101404001000202000000000000000000010101010082820021000000000000000084840000000104042100c0000000000000c088c0c00808040000110188c0c00842424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
