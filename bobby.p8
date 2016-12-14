@@ -337,7 +337,7 @@ end
 
 function random_speed()
  local rand_s = rnd(2) - 1
- local s = abs(rand_s) > 0.5 and 0.2 or 0
+ local s = abs(rand_s) > 0.5 and 0.1 or 0
  return s * sgn(rand_s) 
 end
 
@@ -980,7 +980,7 @@ function is_on_map(monster_x, monster_y, threshold)
 end
 
 function sprite_for_monster(sx, sy)
- local offset = tick%20 < 10 and 1 or 0
+ local offset = tick%10 < 5 and 1 or 0
  if abs(sy) > 0 then
   return monster.front + offset
  else
