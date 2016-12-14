@@ -230,8 +230,8 @@ function detect_map_special()
  end
 end
 
-function random_spawn_delay()
- return 30 + srand(180)
+function random_delay(mini, range)
+ return flr(rnd(range)) + mini
 end
 
 function reinit_map_items()
@@ -322,14 +322,32 @@ end
 function spawn_monster_if_needed()
  for s in all(spawns) do
   if is_currently_displayed(s.x, s.y) then
-   spawn_monster(s.x, s.y)
-   s.next = random_spawn_delay()
+   s.next -= 1
+   if s.next == 0 then
+    spawn_monster(s.x, s.y)
+    s.next = random_spawn_delay()
+   end
   end
  end
 end
 
-function spawn_monster(x, y)
- 
+function random_spawn_delay()
+ return random_delay(30, 180)
+end
+
+function random_speed()
+ local rand_s = rnd(2) - 1
+ local s = abs(rand_s) > 0.5 and 1 or 0
+ return s * sgn(rand_s) 
+end
+
+function random_move_duration()
+ return random_delay(30, 60)
+end
+
+function spawn_monster(spawn_x, spawn_y)
+ local monster = {x=spawn_x*8, y=spawn_y*8, sx=random_speed(), sy=random_speed(), duration=random_move_duration()}
+ add(monsters, monster)
 end
 
 function handle_game_update()
