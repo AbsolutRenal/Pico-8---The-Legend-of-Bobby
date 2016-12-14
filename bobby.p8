@@ -337,7 +337,7 @@ end
 
 function random_speed()
  local rand_s = rnd(2) - 1
- local s = abs(rand_s) > 0.5 and 1 or 0
+ local s = abs(rand_s) > 0.5 and 0.2 or 0
  return s * sgn(rand_s) 
 end
 
@@ -353,6 +353,7 @@ end
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
 	 spawn_monster_if_needed()
+	 move_monsters()
 	 if is_on_terrain_type(kind.breakable_floor) then
 	  local pos = get_bobby_mid()
 	  add(breakable_floor, {x=pos.x, y=pos.y,sprite=mget(pos.x,pos.y), count_down=break_floor_count_down})
@@ -922,7 +923,6 @@ function draw_game()
  end
  dimm_screen_if_needed()
 	draw_map()
- --handle_bombs()
  bobby.injured = max(bobby.injured -1, 0)
  animate_textures()
  handle_indoor_display()
@@ -931,9 +931,61 @@ function draw_game()
  dimm_screen_if_needed()
  handle_breakable_floor()
  handle_bombs()
+ handle_monsters()
  draw_background_if_behind()
 	reset_palette()
  draw_hud()
+end
+
+function move_monsters()
+ for monster in all(monsters) do
+  -- todo !
+  monster.x += monster.sx
+  monster.y += monster.sy
+  monster.duration -= 1
+  
+  if monster.duration == 0 then
+   monster.sx = random_speed()
+   monster.sy = random_speed() 
+   monster.duration = random_move_duration()
+  end
+ end
+end
+
+
+
+function handle_monsters()
+ for monster in all(monsters) do
+  if is_on_map(monster.x, monster.y, 15) then
+  	local sprite = sprite_for_monster(monster.sx, monster.sy)
+  	if monster.sy < 0 then
+  	 --todo: check if already dimmed
+  	 pal(8, 2, 0)
+  	 pal(7, 2, 0)
+  	end
+  	spr(sprite, monster.x + map_x, monster.y + map_y, 1, 1, monster.sx < 0)
+  	reset_palette()
+  else
+   del(monsters, monster)
+  end
+ end
+end
+
+function is_on_map(monster_x, monster_y, threshold)
+ if monster_x >= (-map_x - threshold) and monster_x <= (-map_x + 128 + threshold) and monster_y >= (-map_y - threshold) and monster_y <= (-map_y + 128 + threshold) then
+  return true
+ else
+  return false
+ end
+end
+
+function sprite_for_monster(sx, sy)
+ local offset = tick%20 < 10 and 1 or 0
+ if abs(sy) > 0 then
+  return monster.front + offset
+ else
+  return monster.side + offset
+ end
 end
 
 function handle_breakable_floor()
@@ -1324,6 +1376,7 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
+
 __gff__
 0000000000000000210040400000404000000000000000001101919111010101404001000202000000000000000000010101010082820021000000000000000084840000000104042100c0000000000000c088c0c00808040000110188c0c00842424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
