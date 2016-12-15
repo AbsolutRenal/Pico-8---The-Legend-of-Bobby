@@ -448,6 +448,7 @@ function draw_teleport_anim()
  handle_indoor_display()
  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
  handle_bombs()
+ handle_monsters()
  animate_textures()
  reset_palette()
  draw_hud()
@@ -938,10 +939,43 @@ function draw_game()
 end
 
 function monster_can_move(monster)
- local monster_position = {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx - map_x)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy - map_y)/8)}
- local s = mget(monster_position.x, monster_position.y)
- local can = not is_kind_of(s, kind.water) and not is_kind_of(s, kind.deep_water) and not has_trait_type(s, flag.solid) and not is_kind_of(s, kind.danger) and not is_kind_of(s, kind.hole)
+-- local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
+ local types = {flag.solid}
+ local cells = {}
+ if abs(monster.sx) > 0 then
+  add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr(monster.y/8)})
+  add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr((monster.y + 8)/8)})
+ end
+ if abs(monster.sy) > 0 then
+  add(cells, {x=flr((monster.x)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+  add(cells, {x=flr((monster.x + 8)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+ end
+ if abs(monster.sx) > 0 and abs(monster.sy) > 0 then
+  add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+ end
+ local s
+ local can = true
+ for cell in all(cells) do
+  s = mget(cell.x, cell.y)
+  can = can and not has_trait_type(s, flag.solid)
+  --can = can and is_none_of_type(s, types)
+ end
  return can
+end
+
+function is_none_of_type(s, types)
+ for t in all(types) do
+  if type(t) == "table" then
+   if is_kind_of(s, t) then
+    return false
+   end
+  elseif type(t) == "number" then
+   if has_trait_type(s, t) then
+    return false
+   end
+  end
+ end
+ return true
 end
 
 function switch_monster_direction(monster)
@@ -952,21 +986,18 @@ end
 
 function move_monsters()
  for monster in all(monsters) do
-  -- todo !
   if monster_can_move(monster) then
-  monster.x += monster.sx
-  monster.y += monster.sy
-  monster.duration -= 1
-  if monster.duration == 0 then
-   switch_monster_direction(monster)
-  end
+   monster.x += monster.sx
+   monster.y += monster.sy
+   monster.duration -= 1
+   if monster.duration == 0 then
+    switch_monster_direction(monster)
+   end
   else
    switch_monster_direction(monster)
   end
  end
 end
-
-
 
 function handle_monsters()
  for monster in all(monsters) do
