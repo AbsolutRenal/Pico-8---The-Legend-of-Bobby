@@ -939,8 +939,7 @@ function draw_game()
 end
 
 function monster_can_move(monster)
--- local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
- local types = {flag.solid}
+ local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
  local cells = {}
  if abs(monster.sx) > 0 then
   add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr(monster.y/8)})
@@ -957,8 +956,7 @@ function monster_can_move(monster)
  local can = true
  for cell in all(cells) do
   s = mget(cell.x, cell.y)
-  can = can and not has_trait_type(s, flag.solid)
-  --can = can and is_none_of_type(s, types)
+  can = can and is_none_of_type(s, types)
  end
  return can
 end
