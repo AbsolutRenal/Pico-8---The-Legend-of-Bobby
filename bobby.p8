@@ -148,12 +148,16 @@ kind = {
  monster_spawn = {6,7}
 }
 
+damage = {
+ hole = 2,
+ bomb = 3,
+ monster = 1
+}
+
 
 -- game config
 alpha_color = 14
-bomb_damage = 3
 bomb_range = 16
-hole_damage = 2
 refresh_rate = 2
 walking = 1
 running = 1.5
@@ -399,14 +403,26 @@ function handle_game_update()
 		 btn_1_down = false
 		end
 		move_bobby()
+
+  manage_monster_damage()
 	--end
+end
+
+function manage_monster_damage()
+local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y}
+ for m in all(monsters) do
+  if distance_from_centers(bobby_map_position, m) < 8 then
+   injured(damage.monster, 60)
+   return
+  end
+ end
 end
 
 function falling_anim()
  teleport_bobby_stretch(true, 2, 2)
  bobby.x = bobby.last_safe.x
  bobby.y = bobby.last_safe.y
- injured(hole_damage)
+ injured(damage.hole)
 end
 
 function destination_for_door_at(cell)
@@ -1216,7 +1232,7 @@ end
 function handle_bomb_damage()
  local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y, hitbox=bobby.hitbox}
  if distance(current_bomb,bobby_map_position) < bomb_range then
-  injured(bomb_damage)
+  injured(damage.bomb)
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
@@ -1245,12 +1261,14 @@ function distance_from_centers(a,b)
  return sqrt((mb.x - ma.x)*(mb.x - ma.x) + (mb.y - ma.y)*(mb.y - ma.y))
 end
 
-function injured(damage)
- life = max(life -damage, 0)
- if life == 0 then
-  kill_bobby()
- else
-  bobby.injured = 16
+function injured(damage, injuring_duration)
+ if bobby.injured == 0 then
+  life = max(life -damage, 0)
+  if life == 0 then
+   kill_bobby()
+  else
+   bobby.injured = injuring_duration != nil and injuring_duration or 16
+  end
  end
 end
 
