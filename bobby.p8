@@ -98,7 +98,6 @@ sprites = {
  key = 62,
  candle = 66,
  big_candle = 67,
- breakable_floor = 82,
  rounded_water_1 = 96,
  rounded_water_2 = 97,
  rounded_water_3 = 98,
@@ -118,7 +117,11 @@ sprites = {
  rounded_sand_5 = 112,
  rounded_sand_6 = 113,
  rounded_sand_7 = 114,
- rounded_sand_8 = 115
+ rounded_sand_8 = 115,
+ breakable_floor1 = 82,
+ breakable_floor2 = 92,
+ broken_floor1 = 85,
+ broken_floor2 = 95
 }
 
 -- flags
@@ -243,7 +246,7 @@ end
 
 function reinit_map_items()
  local s
- local items = {{from=sprites.big_treasure_opened1,to=sprites.treasure1},{from=sprites.big_treasure_opened2,to=sprites.treasure2},{from=sprites.big_treasure_opened3,to=sprites.treasure5},{from=sprites.big_treasure_opened4,to=sprites.treasure6},{from=sprites.treasure_opened,to=sprites.treasure3},{from=sprites.treasure_sand_opened,to=sprites.treasure7},{from=sprites.treasure_mud_opened,to=sprites.treasure8},{from=sprites.rock2_broken,to=sprites.rock2},{from=sprites.rock4_broken,to=sprites.rock4}}
+ local items = {{from=sprites.big_treasure_opened1,to=sprites.treasure1},{from=sprites.big_treasure_opened2,to=sprites.treasure2},{from=sprites.big_treasure_opened3,to=sprites.treasure5},{from=sprites.big_treasure_opened4,to=sprites.treasure6},{from=sprites.treasure_opened,to=sprites.treasure3},{from=sprites.treasure_sand_opened,to=sprites.treasure7},{from=sprites.treasure_mud_opened,to=sprites.treasure8},{from=sprites.rock2_broken,to=sprites.rock2},{from=sprites.rock4_broken,to=sprites.rock4},{from=sprites.broken_floor1,to=sprites.breakable_floor1},{from=sprites.broken_floor2,to=sprites.breakable_floor2}}
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
@@ -298,8 +301,10 @@ function color_for_sprite(sprite)
   col = 5
  elseif sprite == sprites.door or sprite == sprites.stairs then
   col = 2
- elseif sprite == sprites.breakable_floor then
+ elseif sprite == sprites.breakable_floor1 then
   col = 13
+ elseif sprite == sprites.breakable_floor2 then
+  col = 4
  end
  return col
 end
@@ -1473,7 +1478,6 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
-
 __gff__
 0000000000000000210040400000404000000000000000001101919111010101404001000202000000000000000000010101010082820021000000000000000084840000000104042100c0000000000000c088c0c00808040000110188c0c00842424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
