@@ -387,7 +387,7 @@ function handle_game_update()
 	   end
 	  elseif is_on_terrain_type(kind.door) then
 	   local dest = destination_for_door_at(bobby_mid)
-    teleport_bobby_to(dest, dest.offset_x, dest.offset_y)
+    open_door_to(dest)
 	   return
 	  end
 	 end
@@ -462,16 +462,19 @@ function teleport_bobby_stretch(out, dsx, dsy)
 end
 
 function draw_teleport_anim()
- dimm_screen_if_needed()
- draw_map()
- handle_indoor_display()
+ draw_environment()
  sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
- handle_bombs()
- handle_monsters()
- animate_textures()
- reset_palette()
- draw_hud()
+ draw_foreground()
  yield()
+end
+
+function open_door_to(dest)
+	teleport_bobby_to(dest, dest.offset_x, dest.offset_y)
+	draw_environment()
+ current_spr = moves.standing
+ draw_bobby()
+ draw_foreground()
+	delay_co = delay(10)
 end
 
 function teleport_bobby_to(p, offset_x, offset_y)
@@ -898,6 +901,9 @@ function _draw()
  if state == game_state.state_opening then
   draw_display(true,launch)
  elseif state == game_state.state_game then
+  if not should_draw then
+   return
+ 	end
   draw_game()
  elseif state == game_state.state_gps then
   draw_gps()
@@ -910,17 +916,9 @@ function _draw()
 end
 
 function draw_dead_state()
- dimm_screen_if_needed()
-	draw_map()
- handle_indoor_display()
+ draw_environment()
  draw_bobby()
- handle_bombs()
- dimm_screen_if_needed()
- handle_monsters()
- animate_textures()
-	draw_background_if_behind()
-	reset_palette()
-	draw_hud()
+ draw_foreground()
  draw_text("˜ you loose ˜",36,1,8)
 end
 
@@ -939,22 +937,27 @@ function draw_gps()
 end
 
 function draw_game()
- if not should_draw then
-  return
- end
- dimm_screen_if_needed()
-	draw_map()
+ draw_environment()
  bobby.injured = max(bobby.injured -1, 0)
+	draw_bobby()
+ draw_foreground()
+end
+
+function draw_environment()
+ dimm_screen_if_needed()
+ draw_map()
  animate_textures()
  handle_indoor_display()
-	open_treasure_if_needed()
-	draw_bobby()
+ open_treasure_if_needed()
+end
+
+function draw_foreground()
  dimm_screen_if_needed()
  handle_breakable_floor()
  handle_bombs()
  handle_monsters()
  draw_background_if_behind()
-	reset_palette()
+ reset_palette()
  draw_hud()
 end
 
@@ -1307,16 +1310,9 @@ function loose_game()
 end
 
 function draw_display(open,completion)
- dimm_screen_if_needed()
- draw_map()
- handle_indoor_display() 
- handle_bombs()
+ draw_environment()
  draw_bobby()
- handle_monsters()
- animate_textures()
-	draw_background_if_behind()
-	draw_hud()
- reset_palette()
+ draw_foreground()
  
  local colors = {10,12,8,1}
  animate_open_close(open,32,colors,completion)
@@ -1477,6 +1473,7 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
+
 __gff__
 0000000000000000210040400000404000000000000000001101919111010101404001000202000000000000000000010101010082820021000000000000000084840000000104042100c0000000000000c088c0c00808040000110188c0c00842424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
