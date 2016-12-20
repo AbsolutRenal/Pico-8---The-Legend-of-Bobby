@@ -358,7 +358,7 @@ function random_move_duration()
 end
 
 function spawn_monster(spawn_x, spawn_y)
- local monster = {x=spawn_x*8, y=spawn_y*8, sx=random_speed(), sy=random_speed(), duration=random_move_duration()}
+ local monster = {x=spawn_x*8, y=spawn_y*8, sx=random_speed(), sy=random_speed(), duration=random_move_duration(), dead=-1}
  add(monsters, monster)
 end
 
@@ -417,7 +417,7 @@ end
 function manage_monster_damage()
 local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y}
  for m in all(monsters) do
-  if distance_from_centers(bobby_map_position, m) < 8 then
+  if distance_from_centers(bobby_map_position, m) < 6 then
    injured(damage.monster, 60)
    return
   end
@@ -1012,6 +1012,9 @@ end
 
 function move_monsters()
  for monster in all(monsters) do
+  if monster.dead > -1 then
+   return
+  end
   if monster_can_move(monster) then
    monster.x += monster.sx
    monster.y += monster.sy
@@ -1028,23 +1031,31 @@ end
 function handle_monsters()
 local back_eye = 2
 local back_teeth = 2
- for monster in all(monsters) do
-  if is_on_map(monster.x, monster.y, 15) then
-  	local sprite = sprite_for_monster(monster.sx, monster.sy)
+ for m in all(monsters) do
+  if is_on_map(m.x, m.y, 15) then
+   local sprite
+   if m.dead > -1 then
+    sprite = monster.dead + m.dead
+    m.dead -= 1
+    if m.dead == -1 then
+     del(monsters, m)
+    end
+   else
+  	 sprite = sprite_for_monster(m.sx, m.sy)
+  	end
   	if is_indoor() then
    	back_teeth = 0
   	 back_eye = 0
   	 dimm_screen(palette.monster_shadow)
   	end
-  	if monster.sy < 0 then
+  	if m.sy < 0 then
   	 pal(8, back_eye, 0)
   	 pal(7, back_teeth, 0)
-  	end
-  	
-  	spr(sprite, monster.x + map_x, monster.y + map_y, 1, 1, monster.sx < 0)
+  	end  	
+  	spr(sprite, m.x + map_x, m.y + map_y, 1, 1, m.sx < 0)
   	reset_palette()
   else
-   del(monsters, monster)
+   del(monsters, m)
   end
  end
 end
@@ -1272,8 +1283,9 @@ function handle_bomb_damage()
 
  for m in all(monsters) do
   if distance_from_centers(m, current_bomb) < bomb_range then
-   spr(monster.dead, m.x + map_x, m.y + map_y)
-   del(monsters, m)
+   --spr(monster.dead, m.x + map_x, m.y + map_y)
+   --del(monsters, m)
+   m.dead = 3
   end
  end
 end
@@ -1382,14 +1394,14 @@ eeeeeee24e555eee1d666dd1aaaaaaa711111111cc1c1111e55c5c5ce551dd15edeeeeeee57555ee
 eeeeeee2455555ee1dd66d11aa7aaaaa11111c1111111111eec5c5c5e5511551ee5e5ee5e57555eee777777ea767777eae6eeeeee6eeee6eeeee5eee51118800
 eeeeee22225555eee111111eafaaaaaa1111c1cc11111111eeec5c5eee15d15eeeede5eee55575eeee7777eeae9799aeae9e99ae5eee6e5eeee55eeeeeeee8fe
 eeeeee5555555eeeeeeeeeeeaaaaf7aa111111111111c111eeeec5eeeeeeeeeeeeeeeeeeee555eeeeeeeeeeeeae96aaeeae96aaeeeeaeeeeeeeeeeeeeeeeeeee
-5555555555555555eeeeeeeeeeeeaeee444444440dd00dd00dd00dd0e555555e0dd00dd044444444eeeeeeeeeeeeeeee00000000000000000000000000000000
-5000000550000005eeeeaeeeeeeaaaee44444444055d055d0550005d500000050005050044444445e000000eeeeeeeee00000000000000000000000000000000
-50d2d205509a9a05eeeaaaeeeeaa9aae44444244055d055d0500000d500000050055500544544254e011880eeeeeeeee00000000000000000000000000000000
-502d2d0550a9a905eeea9aeeeea999ae444444440000000000000000501111050000005544404445e011880eeeeeeeee00000000000000000000000000000000
-50d2d205509a9a05eeee5eeeeea999ae444444440dd00dd000000000511551150dd5000d41444544e088110eee2ee2ee00000000000000000000000000000000
-502d2d0550a9a905eeee6eeeeeeaaaee42444444055d055d0d00000d515665150500550d40414404e088110eeee22eee00000000000000000000000000000000
-5000000550000005eeee6eeee5ee5ee544444424055d055d0d00200d55666655005d055044540455e000000eeee22eee00000000000000000000000000000000
-5555555555555555eeee6eeeee55555e444444440000000000022200eeeeeeee0000000044444444eeeeeeeeee2ee2ee00000000000000000000000000000000
+5555555555555555eeeeeeeeeeeeaeee444444440dd00dd00dd00dd0e555555e0dd00dd044444444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7eeee7e00000000
+5000000550000005eeeeaeeeeeeaaaee44444444055d055d0550005d500000050005050044444445e000000eeeeeeeeee72ee27ee2e22e2e7eeeeee700000000
+50d2d205509a9a05eeeaaaeeeeaa9aae44444244055d055d0500000d500000050055500544544254e011880eeeeeeeee72822e2728222282ee2222ee00000000
+502d2d0550a9a905eeea9aeeeea999ae444444440000000000000000501111050000005544404445e011880eeeeeeeeee2eeee8ee2eeee2ee222222e00000000
+50d2d205509a9a05eeee5eeeeea999ae444444440dd00dd000000000511551150dd5000d41444544e088110eee2ee2ee27eeee72e2eeee2ee28ee82e00000000
+502d2d0550a9a905eeee6eeeeeeaaaee42444444055d055d0d00000d515665150500550d40414404e088110eeee22eee2e8eeee2e22ee22ee22ee22e00000000
+5000000550000005eeee6eeee5ee5ee544444424055d055d0d00200d55666655005d055044540455e000000eeee22eeee2e22e2e2e2222e2ee7227ee00000000
+5555555555555555eeee6eeeee55555e444444440000000000022200eeeeeeee0000000044444444eeeeeeeeee2ee2eeee27728ee22ee22ee22ee22e00000000
 6ddddddd444444440d1d06d70d1006d70d1006d00d1006d0e400024e002222200000000000000000444444444000000434441413314404433140044331000043
 d111111640000004d0dd0d00d0000d0000000d0000000000400000040502220d00000000000000004444444440a99a0444044045440440454400404540000005
 d16ddd164066dd0400ddd0d1000000d10000000100000001000000020502220d0000000000000000400000044055550444441444401404004001000400000000
