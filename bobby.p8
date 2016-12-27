@@ -227,14 +227,17 @@ end
 function detect_map_special()
  teleports = {}
  spawns = {}
+ water_cells = {}
  local s
  for j=0,127 do
   for i=0,127 do
    s = mget(i,j)
    if is_kind_of(s, kind.teleport) then
-    add(teleports,{x=i,y=j})
+    add(teleports, {x=i, y=j})
    elseif is_kind_of(s, kind.monster_spawn) then
-    add(spawns, {x=i,y=j, next=random_spawn_delay()})
+    add(spawns, {x=i, y=j, next=random_spawn_delay()})
+   elseif is_kind_of(s, kind.water) or is_kind_of(s, kind.deep_water) then
+    add(water_cells, {x=i, y=j})
    end
   end
  end
@@ -411,6 +414,7 @@ function handle_game_update()
 		move_bobby()
 
   manage_monster_damage()
+  animate_textures()
 	--end
 end
 
@@ -951,7 +955,6 @@ end
 function draw_environment()
  dimm_screen_if_needed()
  draw_map()
- animate_textures()
  handle_indoor_display()
  open_treasure_if_needed()
 end
@@ -1179,22 +1182,21 @@ function draw_bobby()
 end
 
 function animate_textures()
- local c
- local n = flr(-map_x/8)
- local m = flr(-map_y/8)
- for i=n,n+16 do
-  for j=m,m+16 do
-   c = mget(i,j)
-   if (tick%21) == 0 then
-    if is_kind_of(c,kind.water) then
-     mset(i,j,sprites.water + tick%2)
-    elseif is_kind_of(c,kind.deep_water) then
-     mset(i,j,sprites.deep_water + tick%2)
-    end
-   elseif (tick%29) == 0 then
-    if is_kind_of(c, kind.teleport) then
-     mset(i,j,sprites.teleport1+ tick%2)
-    end
+ local should_animate = (tick%21) == 0
+ local offset = tick%2 > 0 and -1 or 1
+ if should_animate then
+  for t in all(water_cells) do
+   if is_on_map(t.x*8, t.y*8, 10) then
+    mset(t.x, t.y, mget(t.x, t.y) + offset)
+   end
+  end
+ end
+ 
+ should_animate = (tick%29) == 0
+ if should_animate then
+  for t in all(teleports) do
+   if is_on_map(t.x*8, t.y*8, 10) then
+    mset(t.x, t.y, mget(t.x, t.y) + offset)
    end
   end
  end
