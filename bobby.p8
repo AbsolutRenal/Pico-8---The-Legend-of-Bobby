@@ -174,7 +174,7 @@ map_move_offset = 32
 heart_value = 3
 candle_decay = 1
 big_candle_decay = 4
-treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
+treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=126,y=47,offset_x=0,offset_y=-1},out={x=81,y=53,offset_x=0,offset_y=1}}, {inn={x=126,y=40,offset_x=0,offset_y=-1},out={x=113,y=44,offset_x=0,offset_y=1}}, {inn={x=122,y=39,offset_x=0,offset_y=-1},out={x=113,y=32,offset_x=0,offset_y=1}}, {inn={x=120,y=32,offset_x=0,offset_y=1},out={x=126,y=32,offset_x=0,offset_y=1}}, {inn={x=16,y=13,offset_x=0,offset_y=1},out={x=123,y=32,offset_x=0,offset_y=1}}, {inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}, {inn={x=114,y=14,offset_x=0,offset_y=-1},out={x=114,y=16,offset_x=0,offset_y=1}}}
 
 palette = {
@@ -1281,7 +1281,10 @@ function handle_bomb_damage()
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
   if has_trait_type(cell.sprite, flag.destroyable) then
-   local s = is_hidden_door(cell) and sprites.stairs or cell.sprite +1
+   local s = hide_secret(cell)
+   if s == nil then
+    s = cell.sprite +1
+   end
    mset(cell.x, cell.y, s)
   end
  end
@@ -1295,13 +1298,18 @@ function handle_bomb_damage()
  end
 end
 
-function is_hidden_door(cell)
+function hide_secret(cell)
  for d in all(doors) do
   if (cell.x == d.inn.x and cell.y == d.inn.y) or (cell.x == d.out.x and cell.y == d.out.y) then
-   return true
+   return sprites.stairs
   end
  end
- return false
+ for t in all(treasures) do
+  if (cell.x == t.x and cell.y == t.y) then
+   return sprites.treasure3
+  end
+ end
+ return nil
 end
 
 function distance(a,b)
@@ -1523,7 +1531,7 @@ __map__
 346761247b3333332323002323000030315623235c5c005c00002021180030312021776933333333333333333333336a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444505050525044564545
 3434676124713333752340232323000037005c005c005c000000303100000000303123776933333333333333336a74002300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444505050505044444545
 34343467247b71336b2320210000000000000000000000000000000000000023232323232377693333333333337400232300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045455745454544444444444451454545
-3434343461247b333375303100000000000000000000000000000000000000000000000000237769333333336a2323230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454545454545454545454545454545
+3434343461247b333375303137000000000000000000000000000000000000000000000000237769333333336a2323230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454545454545454545454545454545
 3434343467242433336b00232323232300000020210000000000202100000000000000370000000023232320210000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454645454545454545454545454545
 3434343434242433333300000023230000000030312323000000303100000000370000000023230000232330310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444444444444444444445
 2424246334242433333300232323232323003218000000230000000000000000000000002323002200000020210000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444444444444444444445
