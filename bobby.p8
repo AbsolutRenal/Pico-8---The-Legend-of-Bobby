@@ -1183,11 +1183,13 @@ end
 
 function animate_textures()
  local should_animate = (tick%21) == 0
- local offset = tick%2 > 0 and -1 or 1
+ local offset = tick%2
+ local sprite
  if should_animate then
   for t in all(water_cells) do
-   if is_on_map(t.x*8, t.y*8, 10) then
-    mset(t.x, t.y, mget(t.x, t.y) + offset)
+   if is_on_map(t.x*8, t.y*8, 16) then
+    sprite = is_kind_of(mget(t.x, t.y), kind.water) and sprites.water or sprites.deep_water
+    mset(t.x, t.y, sprite + offset)
    end
   end
  end
@@ -1195,8 +1197,8 @@ function animate_textures()
  should_animate = (tick%29) == 0
  if should_animate then
   for t in all(teleports) do
-   if is_on_map(t.x*8, t.y*8, 10) then
-    mset(t.x, t.y, mget(t.x, t.y) + offset)
+   if is_on_map(t.x*8, t.y*8, 16) then
+    mset(t.x, t.y, sprites.teleport1 + offset)
    end
   end
  end
