@@ -172,6 +172,8 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
+treasure_opening_delay = 45
+restore_life_delay = 5
 candle_decay = 1
 big_candle_decay = 4
 treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
@@ -791,29 +793,44 @@ end
 function activate_treasure(cell)
  for t in all(treasures) do
   if t.x == cell.x and t.y == cell.y then
-   if not one_shot_item(t.sprite) then
-    add(items,t)
-   elseif t.sprite == sprites.heart_full then
-    life = min(life + heart_value,hearts * heart_value)
-   elseif t.sprite == sprites.heart_increment then
-    hearts += 1
-   elseif t.sprite == sprites.key then
-    keys += 1
-   end
-   if t.sprite == sprites.candle then
-    light_decay = candle_decay
-   elseif t.sprite == sprites.big_candle then
-    light_decay = big_candle_decay
-    replace_candle_with(t)
-   end
    spr(t.sprite,bobby.x, bobby.y - 10)
    if t.descript != nil then
     draw_text(t.descript.text,t.descript.x,0,7)
    end
+   if not one_shot_item(t.sprite) then
+    add(items,t)
+    if t.sprite == sprites.candle then
+     light_decay = candle_decay
+    elseif t.sprite == sprites.big_candle then
+     light_decay = big_candle_decay
+     replace_candle_with(t)
+    end
+   elseif t.sprite == sprites.heart_full then
+    life = min(life + heart_value,hearts * heart_value)
+   elseif t.sprite == sprites.heart_increment then
+    hearts += 1
+    delay_co = cocreate(restore_life)
+    return
+   elseif t.sprite == sprites.key then
+    keys += 1
+   end   
    delay_co = cocreate(delay)
-   coresume(delay_co,45)
+   coresume(delay_co,treasure_opening_delay)
    return
   end
+ end
+end
+
+function restore_life()
+ local current_delay = 0
+ while life < hearts * heart_value do
+  life += 1
+  draw_hud()
+  current_delay += restore_life_delay
+  delay(restore_life_delay)
+ end
+ if current_delay < treasure_opening_delay then
+  delay(treasure_opening_delay - current_delay)
  end
 end
 
@@ -1522,6 +1539,7 @@ aaaaf7aaddddf7aaaaaaddddaaaaf7aa33333333aaaa33333333aaaa33333333ddddddddaaaadddd
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
 43434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343434343
+
 __gff__
 0000000000000000210040400000404000000000000000001101919111010101404001000202000000000000000000010101010082820021000000000000000084840000000104042100c0000000000000c088c0c00808040000110188c0c00842424242c2c2c2c2000000000000000000000000000000004242424200000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
