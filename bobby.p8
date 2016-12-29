@@ -185,6 +185,7 @@ palette = {
 
 -- func
 function _init()
+	hidden_items = {}
  new_game()
 end
 
@@ -259,6 +260,13 @@ function reinit_map_items()
     end
    end
   end
+ end
+ reinit_hidden()
+end
+
+function reinit_hidden()
+ for item in all(hidden_items) do
+  mset(item.x, item.y, item.sprite)
  end
 end
 
@@ -1301,11 +1309,13 @@ end
 function hide_secret(cell)
  for d in all(doors) do
   if (cell.x == d.inn.x and cell.y == d.inn.y) or (cell.x == d.out.x and cell.y == d.out.y) then
+   add(hidden_items, cell)
    return sprites.stairs
   end
  end
  for t in all(treasures) do
   if (cell.x == t.x and cell.y == t.y) then
+   add(hidden_items, cell)
    return sprites.treasure3
   end
  end
