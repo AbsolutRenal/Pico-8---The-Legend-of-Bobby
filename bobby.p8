@@ -165,6 +165,7 @@ refresh_rate = 2
 walking = 1
 running = 1.5
 max_diving_delay = 60
+spawn_delay = 10
 screen_offset = 8
 map_x_tiles = 112
 map_y_tiles = 64
@@ -377,6 +378,7 @@ end
 
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
+  bobby.injured = max(bobby.injured -1, 0)
 	 spawn_monster_if_needed()
 	 move_monsters()
 	 if is_on_terrain_type(kind.breakable_floor) then
@@ -443,6 +445,18 @@ function falling_anim()
  bobby.x = bobby.last_safe.x
  bobby.y = bobby.last_safe.y
  injured(damage.hole)
+ delay_respawn()
+end
+
+function delay_respawn()
+ current_spr = moves.standing
+ local i = 0
+ while i < spawn_delay do
+  bobby.injured = max(bobby.injured -1, 0)
+  draw_game()
+  yield()
+  i += 1
+ end
 end
 
 function destination_for_door_at(cell)
@@ -493,7 +507,7 @@ function open_door_to(dest)
  current_spr = moves.standing
  draw_bobby()
  draw_foreground()
-	delay_co = delay(10)
+	delay_co = delay(spawn_delay)
 end
 
 function teleport_bobby_to(p, offset_x, offset_y)
@@ -972,7 +986,6 @@ end
 
 function draw_game()
  draw_environment()
- bobby.injured = max(bobby.injured -1, 0)
 	draw_bobby()
  draw_foreground()
 end
