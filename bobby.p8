@@ -157,6 +157,13 @@ damage = {
  monster = 1
 }
 
+delays = {
+ message = 45,
+ treasure_opening = 45,
+ max_diving = 60,
+ restore_life = 5,
+ spawn = 10
+}
 
 -- game config
 alpha_color = 14
@@ -164,8 +171,6 @@ bomb_range = 16
 refresh_rate = 2
 walking = 1
 running = 1.5
-max_diving_delay = 60
-spawn_delay = 10
 screen_offset = 8
 map_x_tiles = 112
 map_y_tiles = 64
@@ -173,11 +178,9 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-treasure_opening_delay = 45
-restore_life_delay = 5
 candle_decay = 1
 big_candle_decay = 4
-treasures = {{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
+treasures = {{x=11,y=8,message={{x=14,text="humm ..."},{x=14,text="really ???!"},{x=14,text="it's empty ..."}}},{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=126,y=47,offset_x=0,offset_y=-1},out={x=81,y=53,offset_x=0,offset_y=1}}, {inn={x=126,y=40,offset_x=0,offset_y=-1},out={x=113,y=44,offset_x=0,offset_y=1}}, {inn={x=122,y=39,offset_x=0,offset_y=-1},out={x=113,y=32,offset_x=0,offset_y=1}}, {inn={x=120,y=32,offset_x=0,offset_y=1},out={x=126,y=32,offset_x=0,offset_y=1}}, {inn={x=16,y=13,offset_x=0,offset_y=1},out={x=123,y=32,offset_x=0,offset_y=1}}, {inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}, {inn={x=114,y=14,offset_x=0,offset_y=-1},out={x=114,y=16,offset_x=0,offset_y=1}}}
 
 palette = {
@@ -451,7 +454,7 @@ end
 function delay_respawn()
  current_spr = moves.standing
  local i = 0
- while i < spawn_delay do
+ while i < delays.spawn do
   bobby.injured = max(bobby.injured -1, 0)
   draw_game()
   yield()
@@ -507,7 +510,7 @@ function open_door_to(dest)
  current_spr = moves.standing
  draw_bobby()
  draw_foreground()
-	delay_co = delay(spawn_delay)
+	delay_co = delay(delays.spawn)
 end
 
 function teleport_bobby_to(p, offset_x, offset_y)
@@ -578,7 +581,7 @@ function use_item()
  if item_available(sprites.boots) then
   move_speed = running
  elseif item_available(sprites.flipper) and is_on_terrain_type(kind.deep_water,true) and not btn_2_down then
-  bobby.dive = max_diving_delay
+  bobby.dive = delays.max_diving
  elseif item_available(sprites.bomb) and current_bomb == nil then
   current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
  elseif item_available(sprites.gps) then
@@ -807,6 +810,11 @@ end
 function activate_treasure(cell)
  for t in all(treasures) do
   if t.x == cell.x and t.y == cell.y then
+   if t.sprite == nil and type(t.message) == "table" then
+    delay_co = cocreate(draw_message)
+    coresume(delay_co, t.message)
+    return
+   end
    spr(t.sprite,bobby.x, bobby.y - 10)
    if t.descript != nil then
     draw_text(t.descript.text,t.descript.x,0,7)
@@ -829,9 +837,16 @@ function activate_treasure(cell)
     keys += 1
    end   
    delay_co = cocreate(delay)
-   coresume(delay_co,treasure_opening_delay)
+   coresume(delay_co,delays.treasure_opening)
    return
   end
+ end
+end
+
+function draw_message(message)
+ for m in all(message) do
+  draw_text(m.text, m.x, 0, 7)
+  delay(delays.message)
  end
 end
 
@@ -840,11 +855,11 @@ function restore_life()
  while life < hearts * heart_value do
   life += 1
   draw_hud()
-  current_delay += restore_life_delay
-  delay(restore_life_delay)
+  current_delay += delays.restore_life
+  delay(delays.restore_life)
  end
- if current_delay < treasure_opening_delay then
-  delay(treasure_opening_delay - current_delay)
+ if current_delay < delays.treasure_opening then
+  delay(delays.treasure_opening - current_delay)
  end
 end
 
@@ -1565,7 +1580,7 @@ __map__
 3434342424247033333333333333333333333333333373792424242424242463653434343461242424242424242424242424247a70336a74232323230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444545444444444545444545
 34343424247a333333333333742320212323233700776933737924242424242424636534343467612424242424242424247a70336a740023230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000202145454444444545454444444545444445
 343466247a7033333333336a202130312218005c0000237769333373792424242424242463653434672424242424247a7033336a74000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000303145444444454545454444444545564445
-343460247033333333742332303123232323005c005c23232300776933333373792424242424636534672424242424703333742300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444545444444444448444445
+343460247033333333742318303123232323005c005c23232300776933333373792424242424636534672424242424703333742300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444545444444444448444445
 34662424333333333320213700004a23232323235c5c5c23000000237769333333737924242424636566242424247a33336a232323000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444544444444444445454545
 34602424333333336a303118000023230023232332475c5c1800002320217769333333337379242424242424247a70336a74232323000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045444444444444505250505044454545
 346124247133333374000000000000202123235c5c235c000000002330312021776933333373797a70333333333333337400002300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045454444444444505050505044444545
