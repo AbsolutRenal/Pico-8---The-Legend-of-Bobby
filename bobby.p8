@@ -1075,6 +1075,7 @@ function move_monsters()
   if monster.dead > -1 then
    return
   end
+  aim_bobby_if_possible(monster)
   if monster_can_move(monster) then
    monster.x += monster.sx
    monster.y += monster.sy
@@ -1085,6 +1086,16 @@ function move_monsters()
   else
    switch_monster_direction(monster)
   end
+ end
+end
+
+function aim_bobby_if_possible(monster)
+ local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
+ if distance_from_centers(bobby_map, monster) < 34 then
+  local speed = 0.3
+  monster.sx = sgn(bobby_map.x - monster.x) * speed
+  monster.sy = sgn(bobby_map.y - monster.y) * speed
+  monster.duration += 1
  end
 end
 
