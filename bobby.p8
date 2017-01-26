@@ -1132,8 +1132,12 @@ end
 function aim_bobby(monster)
  local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
  local speed = 0.3
- monster.sx = sgn(bobby_map.x - monster.x) * speed
- monster.sy = sgn(bobby_map.y - monster.y) * speed
+ local dist_x = bobby_map.x - monster.x
+ local dist_y = bobby_map.y - monster.y
+ local sx = min(speed,abs(dist_x / 15))
+ local sy = min(speed,abs(dist_y / 15))
+ monster.sx = sgn(dist_x) * ((sx > 0.1) and sx or 0)
+ monster.sy = sgn(dist_y) * ((sy > 0.1) and sy or 0)
  move_monster(monster, true)
 end
 
