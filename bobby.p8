@@ -166,6 +166,7 @@ delays = {
 }
 
 -- game config
+monster_aim = 34
 alpha_color = 14
 bomb_range = 16
 refresh_rate = 2
@@ -1026,20 +1027,52 @@ function draw_foreground()
  draw_hud()
 end
 
-function monster_can_move(monster)
- local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
- local cells = {}
+function monster_can_move(monster, partial_move)
+ local cells
  if abs(monster.sx) > 0 then
+  cells = {}
   add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr(monster.y/8)})
   add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr((monster.y + 8)/8)})
+  if not can_move_to(cells) then
+   if partial_move then
+    monster.sx = 0
+   else
+    return false
+   end
+  end
  end
  if abs(monster.sy) > 0 then
+  cells = {}
   add(cells, {x=flr((monster.x)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
   add(cells, {x=flr((monster.x + 8)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+  if not can_move_to(cells) then
+   if partial_move then
+    monster.sy = 0
+   else
+    return false
+   end
+  end
  end
  if abs(monster.sx) > 0 and abs(monster.sy) > 0 then
+  cells = {}
   add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+  if not can_move_to(cells) then
+   if partial_move then
+    if abs(monster.sx) >= abs(monster.sy) then
+     monster.sy = 0
+    else
+     monster.sx = 0
+    end
+   else
+    return false
+   end
+  end
  end
+ return true
+end
+
+function can_move_to(cells)
+ local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
  local s
  local can = true
  for cell in all(cells) do
@@ -1075,17 +1108,46 @@ function move_monsters()
   if monster.dead > -1 then
    return
   end
-  if monster_can_move(monster) then
-   monster.x += monster.sx
-   monster.y += monster.sy
-   monster.duration -= 1
-   if monster.duration == 0 then
-    switch_monster_direction(monster)
-   end
+  
+  local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
+  if distance_from_centers(bobby_map, monster) < monster_aim then
+   aim_bobby(monster)
   else
-   switch_monster_direction(monster)
+   monster_moves_randomly(monster)
   end
  end
+end
+
+function monster_moves_randomly(monster)
+ if move_monster(monster) then
+  monster.duration -= 1
+  if monster.duration == 0 then
+   switch_monster_direction(monster)
+  end
+ else
+  switch_monster_direction(monster)
+ end
+end
+
+function aim_bobby(monster)
+ local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
+ local speed = 0.3
+ local dist_x = bobby_map.x - monster.x
+ local dist_y = bobby_map.y - monster.y
+ local sx = min(speed,abs(dist_x / 15))
+ local sy = min(speed,abs(dist_y / 15))
+ monster.sx = sgn(dist_x) * ((sx > 0.1) and sx or 0)
+ monster.sy = sgn(dist_y) * ((sy > 0.1) and sy or 0)
+ move_monster(monster, true)
+end
+
+function move_monster(monster, partial_move)
+ if monster_can_move(monster, partial_move) then
+  monster.x += monster.sx
+  monster.y += monster.sy
+  return true
+ end
+ return false
 end
 
 function handle_monsters()
