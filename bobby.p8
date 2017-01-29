@@ -555,7 +555,7 @@ function handle_gps_update()
 end
 
 function select_item()
- if not is_on_terrain_type(kind.deep_water,true) and not btn_1_down then
+ if (not is_on_terrain_type(kind.deep_water,true) or is_on_terrain_type(kind.bridge, false)) and not btn_1_down then
   btn_1_down = true
   local nb = count(items)
   if nb > 1 then
@@ -745,7 +745,7 @@ function should_move()
   --return collide_with(cells, flag.water)
   return collide_with(cells, flag.water, true) or (collide_with(cells, kind.bridge) and bobby.dive > 0)
  end
-	return not collide_with(cells,flag.solid) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper)) or is_on_terrain_type(kind.bridge,false)
+	return not collide_with(cells,flag.solid) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper)) or collide_with(cells, kind.bridge, true)
 end
 
 function collide_with(cells,flags,force_trait)
