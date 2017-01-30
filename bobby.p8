@@ -593,8 +593,16 @@ function use_item()
 end
 
 function stop_item()
- bobby.dive = 0
- btn_2_down = false
+ if bobby.swimming and is_on_terrain_type(kind.bridge, false) then
+  handle_under_bridge()
+ else
+  bobby.dive = 0
+  btn_2_down = false
+ end
+end
+
+function handle_under_bridge()
+
 end
 
 function move_bobby()
@@ -626,7 +634,8 @@ end
 function config_bobby(sx,sy)
  local orientation
  local water = (sx==0 and sy==0) and sprites.water_standing or sprites.water_walk
- if is_on_terrain_type(kind.deep_water,true) and not is_on_terrain_type(kind.bridge,false) then
+ --if is_on_terrain_type(kind.deep_water,true) and not is_on_terrain_type(kind.bridge,false) then
+ if bobby.swimming then
   move_speed = walking * 0.5
   if bobby.dive > 0 then
    orientation = moves.dive
@@ -740,11 +749,13 @@ end
 
 function should_move()
 	local cells = collision_cells()
- local swimming = is_on_terrain_type(kind.deep_water, true) and (not is_on_terrain_type(kind.bridge, false))
+ local swimming = (is_on_terrain_type(kind.deep_water, true) and not is_on_terrain_type(kind.bridge, false)) or (is_on_terrain_type(kind.bridge, false) and bobby.dive > 0)
  if swimming then
+  bobby.swimming = true
   --return collide_with(cells, flag.water)
-  return collide_with(cells, flag.water, true) or (collide_with(cells, kind.bridge) and bobby.dive > 0)
+  return (collide_with(cells, flag.water, true) and not collide_with(cells, kind.bridge, false)) or (collide_with(cells, kind.bridge) and bobby.dive > 0)
  end
+ bobby.swimming = false
 	return not collide_with(cells,flag.solid) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper)) or collide_with(cells, kind.bridge, true)
 end
 
@@ -1366,7 +1377,7 @@ end
 
 function draw_foreground_cells(cells)
  for c in all(cells) do
-  if is_kind_of(c.cell,kind.behind) then
+  if is_kind_of(c.cell,kind.behind) or (bobby.swimming and is_kind_of(c.cell, kind.bridge)) then
    spr(c.cell,c.x*8+map_x,c.y*8+map_y,1,1)
   end
  end
