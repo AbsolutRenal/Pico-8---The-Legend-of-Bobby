@@ -155,10 +155,12 @@ kind = {
 damage = {
  hole = 2,
  bomb = 3,
- monster = 1
+ monster = 1,
+ sink = 1
 }
 
 delays = {
+ sink = 15,
  message = 45,
  treasure_opening = 45,
  max_diving = 60,
@@ -602,7 +604,10 @@ function stop_item()
 end
 
 function handle_under_bridge()
-
+ if bobby.dive == 0 then
+  bobby.dive = delays.sink
+  injured(damage.sink)
+ end
 end
 
 function move_bobby()
