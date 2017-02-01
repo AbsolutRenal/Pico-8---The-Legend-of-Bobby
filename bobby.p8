@@ -1051,7 +1051,7 @@ end
 function draw_injured_effect_if_needed()
  if injured_effect > 0 then
   for i=0,injured_effect,1 do
-   rect(i, i, 127 - i, 127 - i, 8)
+   rect(i, i, 127 - i, 127 - i, 8 + max(4, i) % 4)
   end
   injured_effect -= 1
  end
@@ -1477,7 +1477,7 @@ end
 
 function injured(damage, injuring_duration)
  if bobby.injured == 0 then
-  injured_effect = injured_effect_size
+  injured_effect = injured_effect_size - life + hearts * heart_value
   life = max(life -damage, 0)
   if life == 0 then
    kill_bobby()
