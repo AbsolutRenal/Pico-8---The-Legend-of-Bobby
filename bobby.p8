@@ -811,9 +811,9 @@ function open_treasure_if_needed()
      activate_treasure(cell)
      return
     else
-     draw_text("hum... i need a key !",25,0,7)
      current_spr = moves.standing
      draw_bobby()
+     draw_text("hum... i need a key !",25,0,7)
      delay_co = cocreate(delay)
      coresume(delay_co,15)
      return
