@@ -808,6 +808,7 @@ function open_treasure_if_needed()
      move_count = 0
      current_spr = set_current_spr(moves.open_treasure)
      water_spr = sprites.water_standing
+     draw_bobby()
      activate_treasure(cell)
      return
     else
@@ -825,6 +826,7 @@ function open_treasure_if_needed()
    	move_count = 0
     current_spr = set_current_spr(moves.open_treasure)
     water_spr = sprites.water_standing
+    draw_bobby()
     activate_treasure(cell)
     return
    end
@@ -1034,10 +1036,11 @@ function draw_environment()
  dimm_screen_if_needed()
  draw_map()
  handle_indoor_display()
- open_treasure_if_needed()
+ --open_treasure_if_needed()
 end
 
 function draw_foreground()
+ open_treasure_if_needed()
  dimm_screen_if_needed()
  handle_breakable_floor()
  handle_bombs()
