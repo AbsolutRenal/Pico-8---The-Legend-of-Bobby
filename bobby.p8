@@ -207,7 +207,10 @@ function init_game()
 	map_y = 0
 	tick = 0
 	current_spr = moves.standing
-	bobby = {dive=0,injured=0,sx=0,sy=0,hitbox={x=2,y=6,width=4,height=1},flip_x=false,x=96,y=96}
+ local start_x = 96
+ local start_y = 96
+ local bobby_hit = {x=2, y=6, width=4, height=1}
+	bobby = {dive=0, injured=0, speed={sx=0, sy=0}, hitbox=bobby_hit, flip_x=false, screen_position={x=start_x, y=start_y}, bobby_mid={}, map_position={x=start_x - map_x, y=start_y - map_y, hitbox=bobby_hit}}
 	background_color = 3
 	move_count = 0
 	btn_1_down = false
@@ -282,13 +285,15 @@ function reinit_hidden()
  end
 end
 
-function update_gps_data()
+function update_gps_data_if_needed()
  if not is_indoor() then
   min_x = flr(map_x/-8)
   min_y = flr(map_y/-8)
-  for j=min_y,min_y +15 do
-   for i=min_x,min_x +15 do
-    map_data[i+j*map_x_tiles +1] = color_for_sprite(mget(i, j))
+  if map_data[min_x + min_y * map_x_tiles +1] == 0 or map_data[min_x + (min_y+15) * map_x_tiles +1] == 0 or map_data[(min_x+15) + min_y * map_x_tiles +1] == 0 or map_data[(min_x+15) + (min_y+15) * map_x_tiles +1] == 0 then
+   for j=min_y,min_y +15 do
+    for i=min_x,min_x +15 do
+     map_data[i+j*map_x_tiles +1] = color_for_sprite(mget(i, j))
+    end
    end
   end
  end
@@ -385,26 +390,28 @@ function spawn_monster(spawn_x, spawn_y)
  add(monsters, monster)
 end
 
+function update_map_position()
+ bobby.map_position = {x=bobby.screen_position.x - map_x, y=bobby.screen_position.y - map_y, hitbox={x=2, y=6, width=4, height=1}}
+end
+
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
+  bobby.bobby_mid = get_bobby_mid()
   bobby.injured = max(bobby.injured -1, 0)
 	 spawn_monster_if_needed()
 	 move_monsters()
 	 if is_on_terrain_type(kind.breakable_floor) then
-	  local pos = get_bobby_mid()
-	  add(breakable_floor, {x=pos.x, y=pos.y,sprite=mget(pos.x,pos.y), count_down=break_floor_count_down})
+	  add(breakable_floor, {x=bobby.bobby_mid.x, y=bobby.bobby_mid.y,sprite=mget(bobby.bobby_mid.x,bobby.bobby_mid.y), count_down=break_floor_count_down})
 	 elseif is_on_terrain_type(kind.hole) then
 	  delay_co = cocreate(falling_anim)
 	  return	 
 	 elseif not is_on_terrain_type(kind.danger) then
-   bobby.last_safe = {x=bobby.x - bobby.sx *4, y=bobby.y - bobby.sy *4}
+   bobby.last_safe = {x=bobby.map_position.x - bobby.speed.sx *4, y=bobby.map_position.y - bobby.speed.sy *4}
   end
-	 if is_on_terrain_type(flag.door) then
-	  local bobby_mid = get_bobby_mid()
-	  
+	 if is_on_terrain_type(flag.door) then	  
 	  if is_on_terrain_type(kind.teleport) then
  	  for i=1,count(teleports) do
- 	   if bobby_mid.x == teleports[i].x and bobby_mid.y == teleports[i].y then
+ 	   if bobby.bobby_mid.x == teleports[i].x and bobby.bobby_mid.y == teleports[i].y then
  	    local idx = i +1
  	    if idx > count(teleports) then
 	      idx = 1
@@ -415,7 +422,7 @@ function handle_game_update()
 	    end
 	   end
 	  elseif is_on_terrain_type(kind.door) then
-	   local dest = destination_for_door_at(bobby_mid)
+	   local dest = destination_for_door_at(bobby.bobby_mid)
     open_door_to(dest)
 	   return
 	  end
@@ -437,12 +444,13 @@ function handle_game_update()
   manage_monster_damage()
   animate_textures()
 	--end
+	
+  update_gps_data_if_needed()
 end
 
 function manage_monster_damage()
-local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y}
  for m in all(monsters) do
-  if distance_from_centers(bobby_map_position, m) < 6 then
+  if distance_from_centers(bobby.map_position, m) < 6 then
    injured(damage.monster, 60)
    return
   end
@@ -451,8 +459,9 @@ end
 
 function falling_anim()
  teleport_bobby_stretch(true, 2, 2)
- bobby.x = bobby.last_safe.x
- bobby.y = bobby.last_safe.y
+ bobby.screen_position.x = bobby.last_safe.x + map_x
+ bobby.screen_position.y = bobby.last_safe.y + map_y
+ update_map_position()
  injured(damage.hole)
  delay_respawn()
 end
@@ -505,7 +514,7 @@ end
 
 function draw_teleport_anim()
  draw_environment()
- sspr(0,8,8,8,bobby.x + (8-anim.width)*0.5, bobby.y + 8 - anim.height, anim.width, anim.height)
+ sspr(0,8,8,8,bobby.screen_position.x + (8-anim.width)*0.5, bobby.screen_position.y + 8 - anim.height, anim.width, anim.height)
  draw_foreground()
  yield()
 end
@@ -527,29 +536,30 @@ function teleport_bobby_to(p, offset_x, offset_y)
   local mod_y = dest_y % 128
   map_x = -dest_x + mod_x
   map_y = -dest_y + mod_y
-  bobby.x = mod_x
-  bobby.y = mod_y
+  bobby.screen_position.x = mod_x
+  bobby.screen_position.y = mod_y
  else
-  bobby.x = 64
-  bobby.y = 64
+  bobby.screen_position.x = 64
+  bobby.screen_position.y = 64
   current_spr = moves.standing
   map_x = 64 - (p.x+offset_x) * 8
   map_y = 64 - (p.y+offset_y) * 8
   if map_x > 0 then
-   bobby.x -= map_x
+   bobby.screen_position.x -= map_x
    map_x = 0
   elseif map_x < (-128*7) then
-   bobby.x += (-128*7) - map_x
+   bobby.screen_position.x += (-128*7) - map_x
    map_x = -128*7
   end
   if map_y > 0 then
-   bobby.y -= map_y
+   bobby.screen_position.y -= map_y
    map_y = 0
   elseif map_y < (-64*8 +128) then
-   bobby.y += (-64*8 + 128) - map_y
+   bobby.screen_position.y += (-64*8 + 128) - map_y
    map_y = -64*8 + 128
   end
  end
+ update_map_position()
 end
 
 function handle_gps_update()
@@ -589,7 +599,7 @@ function use_item()
  elseif item_available(sprites.flipper) and is_on_terrain_type(kind.deep_water,true) and not btn_2_down then
   bobby.dive = delays.max_diving
  elseif item_available(sprites.bomb) and current_bomb == nil then
-  current_bomb = {x=bobby.x - map_x, y=bobby.y - map_y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
+  current_bomb = {x=bobby.map_position.x, y=bobby.map_position.y, count_down=90, hitbox={x=0, y=0, width=8, height=8}}
  elseif item_available(sprites.gps) then
   state = game_state.state_gps
  end
@@ -654,13 +664,13 @@ function config_bobby(sx,sy)
   orientation = walking_sprite(sx,sy)
  end
  
- bobby.sx = sx
- bobby.sy = sy
+ bobby.speed.sx = sx
+ bobby.speed.sy = sy
 	bobby.flip_x = sx == -1
 	current_spr = set_current_spr(orientation)
 	water_spr = water + (move_count%2)
-	local dest_x = bobby.x + sx * move_speed
-	local dest_y = bobby.y + sy * move_speed
+	local dest_x = bobby.screen_position.x + sx * move_speed
+	local dest_y = bobby.screen_position.y + sy * move_speed
 	local min_x = 0
 	local max_x = 128 - screen_offset
 	local min_y = 0
@@ -670,14 +680,15 @@ function config_bobby(sx,sy)
 			dest = map_x - sx * move_speed
 			map_x = min(max(-map_max_x,dest),0)
 		else
-			bobby.x = min(max(dest_x,min_x),max_x)
+			bobby.screen_position.x = min(max(dest_x,min_x),max_x)
 		end
 		if not is_indoor() and ((dest_y <= map_move_offset and map_y < 0 and sy == -1) or (dest_y >= 128 - map_move_offset and map_y > -map_max_y and sy == 1)) then
 			dest = map_y - sy * move_speed
 			map_y = min(max(-map_max_y,dest),0)
 		else
-			bobby.y = min(max(dest_y,min_y),max_y)
+			bobby.screen_position.y = min(max(dest_y,min_y),max_y)
 		end
+  update_map_position()
 	end
 	move_count += tick%2
 end
@@ -715,8 +726,8 @@ function set_current_spr(orientation)
 end
 
 function get_bobby_mid()
- local mid_x = flr((bobby.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5) - map_x)/8)
- local mid_y = flr((bobby.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5) - map_y)/8)
+ local mid_x = flr((bobby.map_position.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5))/8)
+ local mid_y = flr((bobby.map_position.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5))/8)
  return {x=mid_x,y=mid_y}
 end
 
@@ -745,8 +756,7 @@ function has_traits(sprite, flags)
 end
 
 function is_on_terrain_type(t, force_trait)
- local bobby_mid = get_bobby_mid()
- local cell = mget(bobby_mid.x,bobby_mid.y)
+ local cell = mget(bobby.bobby_mid.x, bobby.bobby_mid.y)
  if type(t) == "number" or force_trait then
   return has_trait_type(cell, t)
  elseif type(t) == "table" then
@@ -779,7 +789,7 @@ function collide_with(cells,flags,force_trait)
 end
 
 function open_treasure_if_needed()
- if bobby.sy == -1 then
+ if bobby.speed.sy == -1 then
   local cells = collision_cells()
   for cell in all(cells) do
    if collide_with({cell},kind.closed_treasure) then
@@ -842,7 +852,7 @@ function activate_treasure(cell)
     coresume(delay_co, t.message)
     return
    end
-   spr(t.sprite,bobby.x, bobby.y - 10)
+   spr(t.sprite,bobby.screen_position.x, bobby.screen_position.y - 10)
    if t.descript != nil then
     draw_text(t.descript.text,t.descript.x,0,7)
    end
@@ -913,14 +923,14 @@ function delay(n,completion)
  end
 end
 
-function overlaped_cells_with(cell, offset_x, offset_y)
+function overlaped_cells_with(cell)
  local cells = {}
  local cell_x
  local cell_y
  for i=0,1 do
   for j=0,1 do
-   cell_x = flr((cell.x + (i * 8) - offset_x)/8)
-   cell_y = flr((cell.y + cell.hitbox.y + (j%2)*cell.hitbox.height - offset_y)/8)
+   cell_x = flr((cell.x + (i * 8))/8)
+   cell_y = flr((cell.y + cell.hitbox.y + (j%2)*cell.hitbox.height)/8)
    add(cells,{x=cell_x,y=cell_y,cell=mget(cell_x,cell_y)})
   end
  end
@@ -928,10 +938,10 @@ function overlaped_cells_with(cell, offset_x, offset_y)
 end
 
 function current_collided_cells()
- local cell_min_x = flr((bobby.x + bobby.hitbox.x - map_x)/8)
- local cell_max_x = flr((bobby.x + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
- local cell_min_y = flr((bobby.y + bobby.hitbox.y - map_y)/8)
- local cell_max_y = flr((bobby.y + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
+ local cell_min_x = flr((bobby.map_position.x + bobby.hitbox.x)/8)
+ local cell_max_x = flr((bobby.map_position.x + bobby.hitbox.x + bobby.hitbox.width)/8)
+ local cell_min_y = flr((bobby.map_position.y + bobby.hitbox.y)/8)
+ local cell_max_y = flr((bobby.map_position.y + bobby.hitbox.y + bobby.hitbox.height)/8)
  return {{x=cell_min_x,y=cell_min_y,cell=mget(cell_min_x,cell_min_y)},{x=cell_max_x,y=cell_min_y,cell=mget(cell_max_x,cell_min_y)},{x=cell_min_x,y=cell_max_y,cell=mget(cell_min_x,cell_max_y)},{x=cell_max_x,y=cell_max_y,cell=mget(cell_max_x,cell_max_y)}}
 end
 
@@ -941,25 +951,25 @@ function collision_cells()
  local cell_min_y = 0
  local cell_max_y = 0
  
- if not (bobby.sy == 0) then
-  cell_min_x = flr((bobby.x + bobby.hitbox.x - map_x)/8)
-  cell_max_x = flr((bobby.x + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
-  if bobby.sy > 0 then
-   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
-   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
+ if not (bobby.speed.sy == 0) then
+  cell_min_x = flr((bobby.map_position.x + bobby.hitbox.x)/8)
+  cell_max_x = flr((bobby.map_position.x + bobby.hitbox.x + bobby.hitbox.width)/8)
+  if bobby.speed.sy > 0 then
+   cell_min_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height)/8)
+   cell_max_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height)/8)
   else
-   cell_min_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y - map_y)/8)
-   cell_max_y = flr((bobby.y + bobby.sy * move_speed + bobby.hitbox.y - map_y)/8)
+   cell_min_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y)/8)
+   cell_max_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y)/8)
   end
- elseif not (bobby.sx == 0) then
-  cell_min_y = flr((bobby.y + bobby.hitbox.y - map_y)/8)
-  cell_max_y = flr((bobby.y + bobby.hitbox.y + bobby.hitbox.height - map_y)/8)
-  if bobby.sx > 0 then
-   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
-   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width - map_x)/8)
+ elseif not (bobby.speed.sx == 0) then
+  cell_min_y = flr((bobby.map_position.y + bobby.hitbox.y)/8)
+  cell_max_y = flr((bobby.map_position.y + bobby.hitbox.y + bobby.hitbox.height)/8)
+  if bobby.speed.sx > 0 then
+   cell_min_x = flr((bobby.map_position.x + bobby.speed.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width)/8)
+   cell_max_x = flr((bobby.map_position.x + bobby.speed.sx * move_speed + bobby.hitbox.x + bobby.hitbox.width)/8)
   else
-   cell_min_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x - map_x)/8)
-   cell_max_x = flr((bobby.x + bobby.sx * move_speed + bobby.hitbox.x - map_x)/8)
+   cell_min_x = flr((bobby.map_position.x + bobby.speed.sx * move_speed + bobby.hitbox.x)/8)
+   cell_max_x = flr((bobby.map_position.x + bobby.speed.sx * move_speed + bobby.hitbox.x)/8)
   end
  end
  
@@ -1002,7 +1012,6 @@ function _draw()
  elseif state == game_state.state_loose then
   draw_display(false,new_game)
  end
- update_gps_data()
 end
 
 function draw_dead_state()
@@ -1022,7 +1031,7 @@ function draw_gps()
   i	+= 1
  end
  if not is_indoor() then
-  circ(m_offset_x + flr((bobby.x - map_x)/8), flr((bobby.y - map_y)/8) + m_offset_y, 2, 8)
+  circ(m_offset_x + flr((bobby.map_position.x)/8), flr((bobby.map_position.y)/8) + m_offset_y, 2, 8)
  end
 end
 
@@ -1142,8 +1151,7 @@ function move_monsters()
    return
   end
   
-  local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
-  if distance_from_centers(bobby_map, monster) < monster_aim then
+  if distance_from_centers(bobby.map_position, monster) < monster_aim then
    aim_bobby(monster)
   else
    monster_moves_randomly(monster)
@@ -1163,10 +1171,9 @@ function monster_moves_randomly(monster)
 end
 
 function aim_bobby(monster)
- local bobby_map = {x=bobby.x - map_x, y=bobby.y - map_y}
  local speed = 0.3
- local dist_x = bobby_map.x - monster.x
- local dist_y = bobby_map.y - monster.y
+ local dist_x = bobby.map_position.x - monster.x
+ local dist_y = bobby.map_position.y - monster.y
  local sx = min(speed,abs(dist_x / 15))
  local sy = min(speed,abs(dist_y / 15))
  monster.sx = sgn(dist_x) * ((sx > 0.1) and sx or 0)
@@ -1277,13 +1284,12 @@ function dimm_screen_if_needed()
 end
 
 function draw_light(size)
- local p = get_bobby_mid()
  local bob
- local hitbox = {x=0,y=0,width=0,height=0}
- for j=p.y-size,p.y+size do
-  for i=p.x-size,p.x+size do
-   bob = {x=p.x,y=p.y,hitbox=hitbox}
-   if distance(bob,{x=i,y=j,hitbox=hitbox}) <= size then
+ local hitbox = {x = 0, y = 0, width = 0, height = 0}
+ for j = bobby.bobby_mid.y - size, bobby.bobby_mid.y + size do
+  for i = bobby.bobby_mid.x - size, bobby.bobby_mid.x + size do
+   bob = {x = bobby.bobby_mid.x, y = bobby.bobby_mid.y, hitbox = hitbox}
+   if distance(bob, {x = i, y = j, hitbox = hitbox}) <= size then
     spr(mget(i,j), i*8 + map_x, j*8 + map_y)
    end
   end
@@ -1326,10 +1332,10 @@ function draw_bobby()
   bobby.dive -= 1
  end
  if bobby.injured % 2 == 0 then
- 	spr(current_spr, bobby.x, bobby.y, 1, 1, bobby.flip_x)
+ 	spr(current_spr, bobby.screen_position.x, bobby.screen_position.y, 1, 1, bobby.flip_x)
  end
 	if is_on_terrain_type(kind.water,true) and not is_on_terrain_type(kind.deep_water,true) then
- 	spr(water_spr, bobby.x, bobby.y, 1, 1)
+ 	spr(water_spr, bobby.screen_position.x, bobby.screen_position.y, 1, 1)
 	end
 end
 
@@ -1383,14 +1389,14 @@ function draw_hud()
 end
 
 function draw_background_if_behind()
- local cells = overlaped_cells_with(bobby, map_x, map_y)
+ local cells = overlaped_cells_with(bobby.map_position)
  draw_foreground_cells(cells)
  local monster_cells
  local hitbox = {x=0,y=0,width=8,height=8}
  local monster
  for m in all(monsters) do
   monster = {x=m.x, y=m.y, hitbox=hitbox}
-  monster_cells = overlaped_cells_with(monster, 0, 0)
+  monster_cells = overlaped_cells_with(monster)
   draw_foreground_cells(monster_cells)
  end
 end
@@ -1426,8 +1432,7 @@ function bomb_explode()
 end
 
 function handle_bomb_damage()
- local bobby_map_position = {x=bobby.x - map_x, y=bobby.y - map_y, hitbox=bobby.hitbox}
- if distance(current_bomb,bobby_map_position) < bomb_range then
+ if distance(current_bomb, bobby.map_position) < bomb_range then
   injured(damage.bomb)
  end
  local cells = collision_cells_with(current_bomb)
