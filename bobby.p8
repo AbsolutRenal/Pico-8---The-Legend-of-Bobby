@@ -390,10 +390,13 @@ function spawn_monster(spawn_x, spawn_y)
  add(monsters, monster)
 end
 
+function update_map_position()
+ bobby.map_position = {x=bobby.screen_position.x - map_x, y=bobby.screen_position.y - map_y, hitbox={x=2, y=6, width=4, height=1}}
+end
+
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
   bobby.bobby_mid = get_bobby_mid()
-  bobby.map_position = {x=bobby.screen_position.x - map_x, y=bobby.screen_position.y - map_y, hitbox={x=2, y=6, width=4, height=1}}
   bobby.injured = max(bobby.injured -1, 0)
 	 spawn_monster_if_needed()
 	 move_monsters()
@@ -458,6 +461,7 @@ function falling_anim()
  teleport_bobby_stretch(true, 2, 2)
  bobby.screen_position.x = bobby.last_safe.x + map_x
  bobby.screen_position.y = bobby.last_safe.y + map_y
+ update_map_position()
  injured(damage.hole)
  delay_respawn()
 end
@@ -555,6 +559,7 @@ function teleport_bobby_to(p, offset_x, offset_y)
    map_y = -64*8 + 128
   end
  end
+ update_map_position()
 end
 
 function handle_gps_update()
@@ -683,6 +688,7 @@ function config_bobby(sx,sy)
 		else
 			bobby.screen_position.y = min(max(dest_y,min_y),max_y)
 		end
+  update_map_position()
 	end
 	move_count += tick%2
 end
