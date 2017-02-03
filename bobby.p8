@@ -282,13 +282,15 @@ function reinit_hidden()
  end
 end
 
-function update_gps_data()
+function update_gps_data_if_needed()
  if not is_indoor() then
   min_x = flr(map_x/-8)
   min_y = flr(map_y/-8)
-  for j=min_y,min_y +15 do
-   for i=min_x,min_x +15 do
-    map_data[i+j*map_x_tiles +1] = color_for_sprite(mget(i, j))
+  if map_data[min_x + min_y * map_x_tiles +1] == 0 or map_data[min_x + (min_y+15) * map_x_tiles +1] == 0 or map_data[(min_x+15) + min_y * map_x_tiles +1] == 0 or map_data[(min_x+15) + (min_y+15) * map_x_tiles +1] == 0 then
+   for j=min_y,min_y +15 do
+    for i=min_x,min_x +15 do
+     map_data[i+j*map_x_tiles +1] = color_for_sprite(mget(i, j))
+    end
    end
   end
  end
@@ -437,6 +439,8 @@ function handle_game_update()
   manage_monster_damage()
   animate_textures()
 	--end
+	
+  update_gps_data_if_needed()
 end
 
 function manage_monster_damage()
@@ -1002,7 +1006,6 @@ function _draw()
  elseif state == game_state.state_loose then
   draw_display(false,new_game)
  end
- update_gps_data()
 end
 
 function draw_dead_state()
