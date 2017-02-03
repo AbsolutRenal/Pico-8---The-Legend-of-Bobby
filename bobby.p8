@@ -403,7 +403,7 @@ function handle_game_update()
 	  delay_co = cocreate(falling_anim)
 	  return	 
 	 elseif not is_on_terrain_type(kind.danger) then
-   bobby.last_safe = {x=bobby.screen_position.x - bobby.speed.sx *4, y=bobby.screen_position.y - bobby.speed.sy *4}
+   bobby.last_safe = {x=bobby.map_position.x - bobby.speed.sx *4, y=bobby.map_position.y - bobby.speed.sy *4}
   end
 	 if is_on_terrain_type(flag.door) then	  
 	  if is_on_terrain_type(kind.teleport) then
@@ -456,8 +456,8 @@ end
 
 function falling_anim()
  teleport_bobby_stretch(true, 2, 2)
- bobby.screen_position.x = bobby.last_safe.x
- bobby.screen_position.y = bobby.last_safe.y
+ bobby.screen_position.x = bobby.last_safe.x + map_x
+ bobby.screen_position.y = bobby.last_safe.y + map_y
  injured(damage.hole)
  delay_respawn()
 end
