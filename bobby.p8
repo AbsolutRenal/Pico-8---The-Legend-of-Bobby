@@ -397,6 +397,7 @@ end
 function handle_game_update()
 	--if tick%refresh_rate == 0 then
   bobby.bobby_mid = get_bobby_mid()
+  bobby.current_cell = mget(bobby.bobby_mid.x, bobby.bobby_mid.y)
   bobby.injured = max(bobby.injured -1, 0)
 	 spawn_monster_if_needed()
 	 move_monsters()
@@ -756,11 +757,10 @@ function has_traits(sprite, flags)
 end
 
 function is_on_terrain_type(t, force_trait)
- local cell = mget(bobby.bobby_mid.x, bobby.bobby_mid.y)
  if type(t) == "number" or force_trait then
-  return has_trait_type(cell, t)
+  return has_trait_type(bobby.current_cell, t)
  elseif type(t) == "table" then
-  return is_kind_of(cell, t)
+  return is_kind_of(bobby.current_cell, t)
  end
 end
 
