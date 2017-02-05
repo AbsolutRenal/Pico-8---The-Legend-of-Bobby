@@ -725,10 +725,15 @@ function set_current_spr(orientation)
  return orientation + (move_count%refresh_rate)
 end
 
-function get_bobby_mid()
- local mid_x = flr((bobby.map_position.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5))/8)
- local mid_y = flr((bobby.map_position.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5))/8)
+function get_bobby_mid_px()
+ local mid_x = bobby.map_position.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5)
+ local mid_y = bobby.map_position.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5)
  return {x=mid_x,y=mid_y}
+end
+
+function get_bobby_mid()
+ local bobby_mid = get_bobby_mid_px()
+ return {x=flr(bobby_mid.x / 8), y=flr(bobby_mid.y / 8)}
 end
 
 function is_kind_of(sprite, flags)
@@ -1045,7 +1050,6 @@ function draw_environment()
  dimm_screen_if_needed()
  draw_map()
  handle_indoor_display()
- --open_treasure_if_needed()
 end
 
 function draw_foreground()
@@ -1265,10 +1269,11 @@ end
 function handle_indoor_display()
  if is_indoor() then
   if item_available(sprites.candle) then
-   dimm_screen(palette.shadow)
+   
+   --[[dimm_screen(palette.shadow)
    draw_light(light_decay+1)
    reset_palette()
-   draw_light(light_decay)
+   draw_light(light_decay)]]
   else
    reset_palette()
    draw_exit()
