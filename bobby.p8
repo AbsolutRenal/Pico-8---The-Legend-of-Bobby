@@ -1269,7 +1269,7 @@ end
 function handle_indoor_display()
  if is_indoor() then
   if item_available(sprites.candle) then
-   
+   cast_shadows()
    --[[dimm_screen(palette.shadow)
    draw_light(light_decay+1)
    reset_palette()
@@ -1278,6 +1278,22 @@ function handle_indoor_display()
    reset_palette()
    draw_exit()
    dimm_screen(palette.no_candle)
+  end
+ end
+end
+
+function cast_shadows()
+ reset_palette()
+ local p = get_bobby_mid_px()
+ local col
+ local x
+ local y
+ for a=0,1,0.01 do
+  for r=0,15,1 do
+   x = flr(p.x + cos(a) * r)
+   y = flr(p.y + sin(a) * r)
+   col = sget(x + map_x, y + map_y)
+   pset(x + map_x, y + map_y, col)
   end
  end
 end
