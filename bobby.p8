@@ -1371,7 +1371,7 @@ function draw_bobby()
 end
 
 function animate_textures()
- local should_animate = (tick%21) == 0
+ local should_animate = (tick%21) == 0 and not is_indoor()
  local offset = tick%2
  local sprite
  if should_animate then
