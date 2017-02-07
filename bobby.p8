@@ -1302,6 +1302,8 @@ function cast_shadows()
    col = sget(flr(cell%16) * 8 + mod_x, flr(cell/16) * 8 + mod_y)
    if r > light_decay then
     col = palette.shadow[col+1] 
+   elseif col == 14 then
+    col = 4
    end
    pset(x + map_x, y + map_y, col)
   end
