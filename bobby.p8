@@ -1288,11 +1288,17 @@ function cast_shadows()
  local col
  local x
  local y
+ local cell
+ local mod_x
+ local mod_y
  for a=0,1,0.01 do
   for r=0,15,1 do
    x = flr(p.x + cos(a) * r)
    y = flr(p.y + sin(a) * r)
-   col = sget(x + map_x, y + map_y)
+   mod_x = x%8
+   mod_y = y%8
+   cell = mget(flr(x / 8), flr(y / 8))
+   col = sget(flr(cell%16) * 8 + mod_x, flr(cell/16) * 8 + mod_y)
    pset(x + map_x, y + map_y, col)
   end
  end
