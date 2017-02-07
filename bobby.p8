@@ -1292,13 +1292,17 @@ function cast_shadows()
  local cell
  local mod_x
  local mod_y
- for a=0,1,0.01 do
+ for a=0,1,0.02 do
   for r=0,light_decay+shadow_decay,1 do
    x = flr(p.x + cos(a) * r)
    y = flr(p.y + sin(a) * r)
    mod_x = x%8
    mod_y = y%8
    cell = mget(flr(x / 8), flr(y / 8))
+   if has_trait_type(cell, flag.solid) then
+    --spr(cell, flr(x / 8), flr(y / 8))
+    break
+   end
    col = sget(flr(cell%16) * 8 + mod_x, flr(cell/16) * 8 + mod_y)
    if r > light_decay then
     col = palette.shadow[col+1] 
