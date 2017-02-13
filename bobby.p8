@@ -4,6 +4,8 @@ __lua__
 -- the legend of bobbby
 --  by absolut.renal (2016)
 
+debug = true
+
 -- controls
 controls = {
  up = 2,
@@ -1018,6 +1020,17 @@ function _draw()
  elseif state == game_state.state_loose then
   draw_display(false,new_game)
  end
+ if debug then
+  show_stats()
+ end
+end
+
+function show_stats()
+ rectfill(64, 120, 128, 128, 0)
+ local cpu = flr(stat(1)*100)
+ print("cpu:"..cpu.."%", 68, 122, 7)
+ local mem = flr(stat(0)/10.24)
+ print("mem:"..mem.."%", 98, 122, 7)
 end
 
 function draw_dead_state()
