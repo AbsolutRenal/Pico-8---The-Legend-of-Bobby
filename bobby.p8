@@ -1026,11 +1026,13 @@ function _draw()
 end
 
 function show_stats()
- rectfill(64, 120, 128, 128, 0)
+ rectfill(50, 120, 128, 128, 0)
  local cpu = flr(stat(1)*100)
- print("cpu:"..cpu.."%", 68, 122, 7)
+ local col = cpu < 100 and 7 or 8
+ print("cpu:"..cpu.."%", 54, 122, col)
  local mem = flr(stat(0)/10.24)
- print("mem:"..mem.."%", 98, 122, 7)
+ col = mem < 100 and 7 or 8
+ print("mem:"..mem.."%", 92, 122, col)
 end
 
 function draw_dead_state()
@@ -1299,13 +1301,21 @@ end
 function cast_shadows()
  reset_palette()
  local p = get_bobby_mid_px()
+ --[[for j= 0, 127 do
+  for i= 0, 127 do
+   if sqrt((i - p.x)*(i - p.x) + (j - p.y)*(j - p.y)) > light_decay+shadow_decay then
+    local addr = band(band(0x6000, j*0x40), flr(i/2)*0x01)
+    poke(addr, 0x00)
+   end
+  end
+ end]]
  local col
  local x
  local y
  local cell
  local mod_x
  local mod_y
- for a=0,1,0.02 do
+ for a=0,1,0.01 do
   for r=0,light_decay+shadow_decay,1 do
    x = flr(p.x + cos(a) * r)
    y = flr(p.y + sin(a) * r)
