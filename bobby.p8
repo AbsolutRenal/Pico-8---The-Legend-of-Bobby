@@ -185,8 +185,8 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-candle_decay = 8
-big_candle_decay = 16
+candle_decay = 10
+big_candle_decay = 20
 shadow_decay = 3
 treasures = {{x=11,y=8,message={{x=14,text="humm ..."},{x=14,text="really ???!"},{x=14,text="it's empty ..."}}},{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=126,y=47,offset_x=0,offset_y=-1},out={x=81,y=53,offset_x=0,offset_y=1}}, {inn={x=126,y=40,offset_x=0,offset_y=-1},out={x=113,y=44,offset_x=0,offset_y=1}}, {inn={x=122,y=39,offset_x=0,offset_y=-1},out={x=113,y=32,offset_x=0,offset_y=1}}, {inn={x=120,y=32,offset_x=0,offset_y=1},out={x=126,y=32,offset_x=0,offset_y=1}}, {inn={x=16,y=13,offset_x=0,offset_y=1},out={x=123,y=32,offset_x=0,offset_y=1}}, {inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}, {inn={x=114,y=14,offset_x=0,offset_y=-1},out={x=114,y=16,offset_x=0,offset_y=1}}}
@@ -1301,6 +1301,7 @@ end
 function cast_shadows()
  reset_palette()
  local p = get_bobby_mid_px()
+ shadow_decay = flr(light_decay / 3)
  --[[for j= 0, 127 do
   for i= 0, 127 do
    if sqrt((i - p.x)*(i - p.x) + (j - p.y)*(j - p.y)) > light_decay+shadow_decay then
