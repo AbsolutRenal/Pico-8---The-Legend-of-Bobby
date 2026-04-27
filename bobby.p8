@@ -1306,6 +1306,31 @@ function dimm_screen(palette)
  end
 end
 
+rot_bases={96,100,104,112,116,120}
+
+function get_rot_spr(s)
+ for b in all(rot_bases) do
+  if s>b and s<b+4 then
+   local r=s-b
+   return b,r==1 or r==2,r==2 or r==3
+  end
+ end
+end
+
+function draw_rot_tiles()
+ local cx=map_x\-8
+ local cy=map_y\-8
+ for j=cy,cy+16 do
+  for i=cx,cx+16 do
+   local s=mget(i,j)
+   local b,fx,fy=get_rot_spr(s)
+   if b then
+    spr(b,i*8+map_x,j*8+map_y,1,1,fx,fy)
+   end
+  end
+ end
+end
+
 function draw_map()
  rectfill(0, 0, 127, 127, background_color)
 	cell_x = map_x\-8
@@ -1313,6 +1338,7 @@ function draw_map()
 	mod_x = abs(map_x) % (cell_x * 8)
 	mod_y = abs(map_y) % (cell_y * 8)
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
+ draw_rot_tiles()
 end
 
 function draw_bobby()
