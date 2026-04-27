@@ -148,21 +148,18 @@ kind = {
  deep_water = {1,7},
  behind = {6},
  danger = {6,7},
- monster_spawn = {6,7},
  bridge = {1,3,6,7}
 }
 
 damage = {
  hole = 2,
  bomb = 3,
- monster = 1,
- sink = 1
+ monster = 1
 }
 
 delays = {
  sink = 15,
  message = 45,
- treasure_opening = 45,
  max_diving = 60,
  restore_life = 5,
  spawn = 10
@@ -250,7 +247,7 @@ function detect_map_special()
    s = mget(i,j)
    if is_kind_of(s, kind.teleport) then
     add(teleports, {x=i, y=j})
-   elseif is_kind_of(s, kind.monster_spawn) then
+   elseif is_kind_of(s, kind.danger) then
     add(spawns, {x=i, y=j, next=random_spawn_delay()})
    elseif is_kind_of(s, kind.water) or is_kind_of(s, kind.deep_water) then
     add(water_cells, {x=i, y=j})
@@ -287,8 +284,8 @@ end
 
 function update_gps_data_if_needed()
  if not is_indoor() then
-  min_x = flr(map_x/-8)
-  min_y = flr(map_y/-8)
+  min_x = map_x\-8
+  min_y = map_y\-8
   if map_data[min_x + min_y * map_x_tiles +1] == 0 or map_data[min_x + (min_y+15) * map_x_tiles +1] == 0 or map_data[(min_x+15) + min_y * map_x_tiles +1] == 0 or map_data[(min_x+15) + (min_y+15) * map_x_tiles +1] == 0 then
    for j=min_y,min_y +15 do
     for i=min_x,min_x +15 do
@@ -391,7 +388,8 @@ function spawn_monster(spawn_x, spawn_y)
 end
 
 function update_map_position()
- bobby.map_position = {x=bobby.screen_position.x - map_x, y=bobby.screen_position.y - map_y, hitbox={x=2, y=6, width=4, height=1}}
+ bobby.map_position.x=bobby.screen_position.x-map_x
+ bobby.map_position.y=bobby.screen_position.y-map_y
 end
 
 function handle_game_update()
@@ -618,7 +616,7 @@ end
 function handle_under_bridge()
  if bobby.dive == 0 then
   bobby.dive = delays.sink
-  injured(damage.sink)
+  injured(damage.monster)
  end
 end
 
@@ -726,9 +724,7 @@ function set_current_spr(orientation)
 end
 
 function get_bobby_mid()
- local mid_x = flr((bobby.map_position.x + bobby.hitbox.x + (bobby.hitbox.width * 0.5))/8)
- local mid_y = flr((bobby.map_position.y + bobby.hitbox.y + (bobby.hitbox.height * 0.5))/8)
- return {x=mid_x,y=mid_y}
+ return {x=(bobby.map_position.x+4)\8,y=(bobby.map_position.y+6.5)\8}
 end
 
 function is_kind_of(sprite, flags)
@@ -874,7 +870,7 @@ function activate_treasure(cell)
     keys += 1
    end   
    delay_co = cocreate(delay)
-   coresume(delay_co,delays.treasure_opening)
+   coresume(delay_co,delays.message)
    return
   end
  end
@@ -895,8 +891,8 @@ function restore_life()
   current_delay += delays.restore_life
   delay(delays.restore_life)
  end
- if current_delay < delays.treasure_opening then
-  delay(delays.treasure_opening - current_delay)
+ if current_delay < delays.message then
+  delay(delays.message - current_delay)
  end
 end
 
@@ -918,7 +914,7 @@ function delay(n,completion)
  for i=1,n do
   yield()
  end
- if completion != nil then
+ if completion then
   completion()
  end
 end
@@ -986,10 +982,6 @@ function collision_cells_with(a)
  return {{x=min_x,y=min_y,sprite=mget(min_x,min_y)},{x=max_x,y=min_y,sprite=mget(max_x,min_y)},{x=min_x,y=max_y,sprite=mget(min_x,max_y)},{x=max_x,y=max_y,sprite=mget(max_x,max_y)}}
 end
 
-function ceil(x)
-	return -flr(-x)
-end
-
 function reset_palette()
  pal()
  palt(0,false)
@@ -1018,7 +1010,7 @@ function draw_dead_state()
  draw_environment()
  draw_bobby()
  draw_foreground()
- draw_text("˜ you loose ˜",36,1,8)
+ draw_text("ï¿½ you loose ï¿½",36,1,8)
 end
 
 function draw_gps()
@@ -1027,11 +1019,11 @@ function draw_gps()
  local m_offset_x = (128 - map_x_tiles)*0.5
  local m_offset_y = (128 - map_y_tiles)*0.5
  for col in all(map_data) do
-  pset(m_offset_x + i%map_x_tiles, m_offset_y + flr(i/map_x_tiles), col)
+  pset(m_offset_x + i%map_x_tiles, m_offset_y + i\map_x_tiles, col)
   i	+= 1
  end
  if not is_indoor() then
-  circ(m_offset_x + flr((bobby.map_position.x)/8), flr((bobby.map_position.y)/8) + m_offset_y, 2, 8)
+  circ(m_offset_x + bobby.map_position.x\8, bobby.map_position.y\8 + m_offset_y, 2, 8)
  end
 end
 
@@ -1073,7 +1065,7 @@ function monster_can_move(monster, partial_move)
  local cells
  if abs(monster.sx) > 0 then
   cells = {}
-  add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr(monster.y/8)})
+  add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=monster.y\8})
   add(cells, {x=flr((monster.x + 4 + sgn(monster.sx)*4 + monster.sx)/8), y=flr((monster.y + 8)/8)})
   if not can_move_to(cells) then
    if partial_move then
@@ -1085,7 +1077,7 @@ function monster_can_move(monster, partial_move)
  end
  if abs(monster.sy) > 0 then
   cells = {}
-  add(cells, {x=flr((monster.x)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
+  add(cells, {x=monster.x\8, y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
   add(cells, {x=flr((monster.x + 8)/8), y=flr((monster.y + 4 + sgn(monster.sy)*4 + monster.sy)/8)})
   if not can_move_to(cells) then
    if partial_move then
@@ -1222,12 +1214,8 @@ local back_teeth = 2
  end
 end
 
-function is_on_map(monster_x, monster_y, threshold)
- if monster_x >= (-map_x - threshold) and monster_x <= (-map_x + 128 + threshold) and monster_y >= (-map_y - threshold) and monster_y <= (-map_y + 128 + threshold) then
-  return true
- else
-  return false
- end
+function is_on_map(x,y,t)
+ return x>=(-map_x-t) and x<=(-map_x+128+t) and y>=(-map_y-t) and y<=(-map_y+128+t)
 end
 
 function sprite_for_monster(sx, sy)
@@ -1320,8 +1308,8 @@ end
 
 function draw_map()
  rectfill(0, 0, 127, 127, background_color)
-	cell_x = flr(map_x / -8)
-	cell_y = flr(map_y / -8)
+	cell_x = map_x\-8
+	cell_y = map_y\-8
 	mod_x = abs(map_x) % (cell_x * 8)
 	mod_y = abs(map_y) % (cell_y * 8)
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
