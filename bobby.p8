@@ -138,17 +138,17 @@ flag = {
 }
 --- kind of
 kind = {
- hole = {3},
- breakable_floor = {3,7},
- door = {2},
- teleport = {2,7},
- treasure = {0,4},
- closed_treasure = {0,4,7},
- water = {1},
- deep_water = {1,7},
- behind = {6},
- danger = {6,7},
- bridge = {1,3,6,7}
+ hole=8,
+ breakable_floor=136,
+ door=4,
+ teleport=132,
+ treasure=17,
+ closed_treasure=145,
+ water=2,
+ deep_water=130,
+ behind=64,
+ danger=192,
+ bridge=202
 }
 
 damage = {
@@ -406,7 +406,7 @@ function handle_game_update()
 	 elseif not is_on_terrain_type(kind.danger) then
    bobby.last_safe = {x=bobby.map_position.x - bobby.speed.sx *4, y=bobby.map_position.y - bobby.speed.sy *4}
   end
-	 if is_on_terrain_type(flag.door) then	  
+	 if is_on_terrain_type(kind.door,true) then
 	  if is_on_terrain_type(kind.teleport) then
  	  for i=1,count(teleports) do
  	   if bobby.bobby_mid.x == teleports[i].x and bobby.bobby_mid.y == teleports[i].y then
@@ -567,7 +567,7 @@ function handle_gps_update()
 end
 
 function select_item()
- if (not is_on_terrain_type(kind.deep_water,true) or is_on_terrain_type(kind.bridge, false)) and not btn_1_down then
+ if (not is_on_terrain_type(kind.deep_water,true) or is_on_terrain_type(kind.bridge)) and not btn_1_down then
   btn_1_down = true
   local nb = count(items)
   if nb > 1 then
@@ -605,7 +605,7 @@ function use_item()
 end
 
 function stop_item()
- if bobby.swimming and is_on_terrain_type(kind.bridge, false) then
+ if bobby.swimming and is_on_terrain_type(kind.bridge) then
   handle_under_bridge()
  else
   bobby.dive = 0
@@ -727,61 +727,33 @@ function get_bobby_mid()
  return {x=(bobby.map_position.x+4)\8,y=(bobby.map_position.y+6.5)\8}
 end
 
-function is_kind_of(sprite, flags)
- local bit = 0
- for flag in all(flags) do
-  bit += shl(1, flag)
- end
- return fget(sprite) == bit
-end
+function is_kind_of(s,k) return fget(s)==k end
 
-function has_trait_type(sprite, flags)
- if type(flags) == "number" then
-  return fget(sprite, flags)
- elseif type(flags) == "table" then
-  return has_traits(sprite, flags)
- end
-end
 
-function has_traits(sprite, flags)
- local b = true
- for flag in all(flags) do
-  b = b and fget(sprite,flag)
- end
- return b
-end
-
-function is_on_terrain_type(t, force_trait)
- local cell = mget(bobby.bobby_mid.x, bobby.bobby_mid.y)
- if type(t) == "number" or force_trait then
-  return has_trait_type(cell, t)
- elseif type(t) == "table" then
-  return is_kind_of(cell, t)
- end
+function is_on_terrain_type(t,ft)
+ local c=mget(bobby.bobby_mid.x,bobby.bobby_mid.y)
+ if ft then return fget(c)&t==t end
+ return fget(c)==t
 end
 
 function should_move()
 	local cells = collision_cells()
- local swimming = (is_on_terrain_type(kind.deep_water, true) and not is_on_terrain_type(kind.bridge, false)) or (is_on_terrain_type(kind.bridge, false) and bobby.dive > 0)
+ local swimming = (is_on_terrain_type(kind.deep_water, true) and not is_on_terrain_type(kind.bridge)) or (is_on_terrain_type(kind.bridge) and bobby.dive > 0)
  if swimming then
   bobby.swimming = true
-  --return collide_with(cells, flag.water)
-  return (collide_with(cells, flag.water, true) and not collide_with(cells, kind.bridge, false)) or (collide_with(cells, kind.bridge) and bobby.dive > 0)
+  return (collide_with(cells, kind.water, true) and not collide_with(cells, kind.bridge)) or (collide_with(cells, kind.bridge) and bobby.dive > 0)
  end
  bobby.swimming = false
-	return not collide_with(cells,flag.solid) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper)) or collide_with(cells, kind.bridge, true)
+	return not collide_with(cells,1,true) and (not collide_with(cells,kind.deep_water,true) or item_available(sprites.flipper)) or collide_with(cells, kind.bridge, true)
 end
 
-function collide_with(cells,flags,force_trait)
- local is_colliding = false
+function collide_with(cells,k,ft)
+ local c=false
  for cell in all(cells) do
-  if type(flags) == "number" or force_trait then
-   is_colliding = is_colliding or has_trait_type(cell.sprite,flags)
-  elseif type(flags) == "table" then
-   is_colliding = is_colliding or is_kind_of(cell.sprite,flags)
-  end
+  if ft then c=c or fget(cell.sprite)&k==k
+  else c=c or fget(cell.sprite)==k end
  end
- return is_colliding
+ return c
 end
 
 function open_treasure_if_needed()
@@ -1106,27 +1078,9 @@ function monster_can_move(monster, partial_move)
 end
 
 function can_move_to(cells)
- local types = {kind.water, kind.deep_water, flag.solid, kind.danger, kind.hole}
- local s
- local can = true
  for cell in all(cells) do
-  s = mget(cell.x, cell.y)
-  can = can and is_none_of_type(s, types)
- end
- return can
-end
-
-function is_none_of_type(s, types)
- for t in all(types) do
-  if type(t) == "table" then
-   if is_kind_of(s, t) then
-    return false
-   end
-  elseif type(t) == "number" then
-   if has_trait_type(s, t) then
-    return false
-   end
-  end
+  local s=mget(cell.x,cell.y)
+  if fget(s)==kind.water or fget(s)==kind.deep_water or fget(s,flag.solid) or fget(s)==kind.danger or fget(s)==kind.hole then return false end
  end
  return true
 end
@@ -1451,7 +1405,7 @@ function handle_bomb_damage()
  end
  local cells = collision_cells_with(current_bomb)
  for cell in all(cells) do
-  if has_trait_type(cell.sprite, flag.destroyable) then
+  if fget(cell.sprite,flag.destroyable) then
    local s = hide_secret(cell)
    if s == nil then
     s = cell.sprite +1
