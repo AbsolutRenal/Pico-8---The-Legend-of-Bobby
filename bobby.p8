@@ -1335,8 +1335,8 @@ function draw_map()
  rectfill(0, 0, 127, 127, background_color)
 	cell_x = map_x\-8
 	cell_y = map_y\-8
-	mod_x = abs(map_x) % (cell_x * 8)
-	mod_y = abs(map_y) % (cell_y * 8)
+	mod_x = abs(map_x) % 8
+	mod_y = abs(map_y) % 8
 	map(cell_x,cell_y,-mod_x,-mod_y,17,17)
  draw_rot_tiles()
 end
