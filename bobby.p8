@@ -1312,7 +1312,7 @@ function get_rot_spr(s)
  for b in all(rot_bases) do
   if s>b and s<b+4 then
    local r=s-b
-   return b,r==1 or r==2,r==2 or r==3
+   return b,r==2 or r==3,r==1 or r==2
   end
  end
 end
