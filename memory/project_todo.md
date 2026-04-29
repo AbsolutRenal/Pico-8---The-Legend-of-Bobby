@@ -52,7 +52,7 @@ After Phase 3 complete: 711 remaining (7481/8192 used).
 ## Phase 5 — Bug fixes (high impact, low cost)
 
 - [ ] **13. Monster cap** — ~8 tokens. Add `count(monsters) < MAX` guard in `spawn_monster_if_needed`.
-- [ ] **14. Diagonal slide** — ~20 tokens. When diagonal move blocked, retry horizontal-only then vertical-only in `should_move` / `config_bobby`.
+- [x] **14. Diagonal slide** — ~55 tokens. When diagonal move blocked, retry horizontal-only then vertical-only in `config_bobby`.
 - [ ] **15. Tree hitbox** — ~15 tokens. Skip solid collision for tree sprites on the horizontal axis (trunk is narrow, full tile box is too wide).
 
 ---
