@@ -180,7 +180,7 @@ map_max_x = (map_x_tiles-16) * 8 -- nb columns * column width
 map_max_y = (map_y_tiles-16) * 8
 map_move_offset = 32
 heart_value = 3
-candle_decay = 1
+candle_decay = 2
 big_candle_decay = 4
 treasures = {{x=11,y=8,message={{x=14,text="humm ..."},{x=14,text="really ???!"},{x=14,text="it's empty ..."}}},{x=1,y=20,sprite=sprites.key},{x=24,y=10,sprite=sprites.candle,descript={x=14,text="hum ... a candle, really ?"}},{x=124,y=1,sprite=sprites.big_candle,descript={x=14,text="hey, a lamp !! :)"}},{x=19,y=18,sprite=sprites.boots,descript={x=34,text="you can now run"}},{x=17,y=7,sprite=sprites.bomb,descript={x=20,text="you can now drop bombs"}},{x=11,y=23,sprite=sprites.flipper,descript={x=32,text="you can now swim"}},{x=11,y=28,sprite=sprites.heart_increment},{x=81,y=55,sprite=sprites.heart_increment},{x=10,y=60,sprite=sprites.heart_full},{x=12,y=15,sprite=sprites.heart_full},{x=119,y=38,sprite=sprites.heart_full},{x=120,y=25,sprite=sprites.heart_full},{x=108,y=53,sprite=sprites.heart_increment},{x=109,y=53,sprite=sprites.heart_increment},{x=28,y=12,sprite=sprites.heart_full},{x=11,y=10,sprite=sprites.gps,descript={x=13,text="you now have access to map"}}}
 doors = {{inn={x=126,y=47,offset_x=0,offset_y=-1},out={x=81,y=53,offset_x=0,offset_y=1}}, {inn={x=126,y=40,offset_x=0,offset_y=-1},out={x=113,y=44,offset_x=0,offset_y=1}}, {inn={x=122,y=39,offset_x=0,offset_y=-1},out={x=113,y=32,offset_x=0,offset_y=1}}, {inn={x=120,y=32,offset_x=0,offset_y=1},out={x=126,y=32,offset_x=0,offset_y=1}}, {inn={x=16,y=13,offset_x=0,offset_y=1},out={x=123,y=32,offset_x=0,offset_y=1}}, {inn={x=21,y=10,offset_x=0,offset_y=1},out={x=120,y=0,offset_x=0,offset_y=1}}, {inn={x=114,y=14,offset_x=0,offset_y=-1},out={x=114,y=16,offset_x=0,offset_y=1}}}
@@ -222,6 +222,7 @@ function init_game()
  breakable_floor = {}
  keys = 0
  selected_item = 1
+ has_light = false
  map_data = {}
  create_gps_map()
  monsters = {}
@@ -824,14 +825,14 @@ function activate_treasure(cell)
    if t.descript != nil then
     draw_text(t.descript.text,t.descript.x,0,7)
    end
-   if not one_shot_item(t.sprite) then
+   if t.sprite == sprites.candle then
+    light_decay = candle_decay
+    has_light = true
+   elseif t.sprite == sprites.big_candle then
+    light_decay = big_candle_decay
+    has_light = true
+   elseif not one_shot_item(t.sprite) then
     add(items,t)
-    if t.sprite == sprites.candle then
-     light_decay = candle_decay
-    elseif t.sprite == sprites.big_candle then
-     light_decay = big_candle_decay
-     replace_candle_with(t)
-    end
    elseif t.sprite == sprites.heart_full then
     life = min(life + heart_value,hearts * heart_value)
    elseif t.sprite == sprites.heart_increment then
@@ -868,14 +869,6 @@ function restore_life()
  end
 end
 
-function replace_candle_with(t)
- for i in all(items) do
-  if i.sprite == sprites.candle then
-   del(items,i)
-  end
- end
- sprites.candle = t.sprite
-end
 
 function draw_text(text,x,bg_col,col)
  rectfill(3,100,124,116,bg_col)
@@ -1206,11 +1199,9 @@ end
 
 function handle_indoor_display()
  if is_indoor() then
-  if item_available(sprites.candle) then
-   dimm_screen(palette.shadow)
-   draw_light(light_decay+1)
+  if has_light then
    reset_palette()
-   draw_light(light_decay)
+   cast_shadows()
   else
    reset_palette()
    draw_exit()
@@ -1225,14 +1216,40 @@ function dimm_screen_if_needed()
 	end
 end
 
-function draw_light(size)
- local bob
- local hitbox = {x = 0, y = 0, width = 0, height = 0}
- for j = bobby.bobby_mid.y - size, bobby.bobby_mid.y + size do
-  for i = bobby.bobby_mid.x - size, bobby.bobby_mid.x + size do
-   bob = {x = bobby.bobby_mid.x, y = bobby.bobby_mid.y, hitbox = hitbox}
-   if distance(bob, {x = i, y = j, hitbox = hitbox}) <= size then
-    spr(mget(i,j), i*8 + map_x, j*8 + map_y)
+function cast_shadows()
+ local light_px=light_decay*8
+ local shadow_px=flr(light_px/3)
+ local max_r=light_px+shadow_px
+ local px=bobby.map_position.x+4
+ local py=bobby.map_position.y+6
+ for a=0,1,0.02 do
+  local dx=cos(a) local dy=sin(a)
+  local x=px local y=py
+  for r=1,max_r do
+   x+=dx y+=dy
+   local fx=flr(x) local fy=flr(y)
+   local tx=fx\8 local ty=fy\8
+   local cell=mget(tx,ty)
+   local f=fget(cell)
+   local opaque=fget(cell,flag.solid) or f==kind.door
+   local col=sget((cell%16)*8+fx%8,(cell\16)*8+fy%8)
+   if col!=14 then
+    if r>light_px then col=palette.shadow[col+1] end
+    pset(fx+map_x,fy+map_y,col)
+   end
+   if opaque then
+    local nx=x local ny=y
+    for _=1,12 do
+     nx+=dx ny+=dy
+     local nfx=flr(nx) local nfy=flr(ny)
+     if nfx\8!=tx or nfy\8!=ty then break end
+     local c=sget((cell%16)*8+nfx%8,(cell\16)*8+nfy%8)
+     if c!=14 then
+      if r>light_px then c=palette.shadow[c+1] end
+      pset(nfx+map_x,nfy+map_y,c)
+     end
+    end
+    break
    end
   end
  end
