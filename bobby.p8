@@ -674,7 +674,17 @@ function config_bobby(sx,sy)
 	local max_x = 128 - screen_offset
 	local min_y = 0
 	local max_y = 128 - screen_offset
-	if should_move() then
+	local ok=should_move()
+ if not ok and sx~=0 and sy~=0 then
+  bobby.speed.sy=0
+  if should_move() then sy=0 dest_y=bobby.screen_position.y ok=true
+  else
+   bobby.speed.sx=0 bobby.speed.sy=sy
+   if should_move() then sx=0 dest_x=bobby.screen_position.x ok=true
+   else bobby.speed.sx=sx end
+  end
+ end
+ if ok then
 		if not is_indoor() and ((dest_x <= map_move_offset and map_x < 0 and sx == -1) or (dest_x >= 128 - map_move_offset and map_x > -map_max_x and sx == 1)) then
 			dest = map_x - sx * move_speed
 			map_x = min(max(-map_max_x,dest),0)
@@ -913,8 +923,9 @@ function collision_cells()
  local cell_max_y = 0
  
  if not (bobby.speed.sy == 0) then
-  cell_min_x = flr((bobby.map_position.x + bobby.hitbox.x)/8)
-  cell_max_x = flr((bobby.map_position.x + bobby.hitbox.x + bobby.hitbox.width)/8)
+  local xoff=bobby.speed.sx*move_speed
+  cell_min_x = flr((bobby.map_position.x+xoff+bobby.hitbox.x)/8)
+  cell_max_x = flr((bobby.map_position.x+xoff+bobby.hitbox.x+bobby.hitbox.width)/8)
   if bobby.speed.sy > 0 then
    cell_min_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height)/8)
    cell_max_y = flr((bobby.map_position.y + bobby.speed.sy * move_speed + bobby.hitbox.y + bobby.hitbox.height)/8)
