@@ -206,7 +206,7 @@ function init_game()
 	current_spr = moves.standing
  local start_x = 96
  local start_y = 96
- local bobby_hit = {x=2, y=6, width=4, height=1}
+ local bobby_hit = {x=3, y=6, width=2, height=1}
 	bobby = {dive=0, injured=0, speed={sx=0, sy=0}, hitbox=bobby_hit, flip_x=false, screen_position={x=start_x, y=start_y}, bobby_mid={}, map_position={x=start_x - map_x, y=start_y - map_y, hitbox=bobby_hit}}
 	background_color = 3
 	move_count = 0
