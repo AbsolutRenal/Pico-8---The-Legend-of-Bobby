@@ -772,7 +772,8 @@ function open_treasure_if_needed()
   local cells = collision_cells()
   for cell in all(cells) do
    if collide_with({cell},kind.closed_treasure) then
-    if keys > 0 then
+    if flr((bobby.map_position.x+4)/8)!=cell.x then
+    elseif keys > 0 then
      sfx(2)
      if is_kind_of(mget(cell.x-1,cell.y), kind.closed_treasure) then
       spr(sprites.big_treasure_opened1, (cell.x-1) * 8 + map_x, (cell.y-1) * 8 + map_y)
@@ -809,15 +810,17 @@ function open_treasure_if_needed()
      return
     end
    elseif collide_with({cell},kind.treasure) then
-    sfx(2)
-    mset(cell.x, cell.y, cell.sprite +1)
-    spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
-   	move_count = 0
-    current_spr = set_current_spr(moves.open_treasure)
-    water_spr = sprites.water_standing
-    draw_bobby()
-    activate_treasure(cell)
-    return
+    if flr((bobby.map_position.x+4)/8)==cell.x then
+     sfx(2)
+     mset(cell.x, cell.y, cell.sprite +1)
+     spr(cell.sprite +1, cell.x * 8 + map_x, cell.y * 8 + map_y)
+    	move_count = 0
+     current_spr = set_current_spr(moves.open_treasure)
+     water_spr = sprites.water_standing
+     draw_bobby()
+     activate_treasure(cell)
+     return
+    end
    end
   end
  end
